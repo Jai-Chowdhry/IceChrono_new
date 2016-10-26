@@ -9,6 +9,7 @@
 #TODO: the reading of observations does not work if there is only one observation (since the readed matrix is 1D in this case).
 #TODO: is there really a computation gain with the change of variable for the correction functions? Avoiding this change of variables would make the code easier to understand. I think there is no gain since solving A^-1 b when we have the LU factorisation of A does not cost more than computing A^-1 * b when we have computed A^-1.
 
+#TODO: Comment all lines for implementation of orbital tuning.
 
 def interp1d_extrap(x,y):
     def f(xp):
