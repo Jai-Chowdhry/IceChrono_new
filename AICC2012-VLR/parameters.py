@@ -1,7 +1,9 @@
-list_drillings=['EDC','VK','TALDICE','EDML','NGRIP']
+list_drillings=['EDC','EDML']
 
-opt_method='leastsq'  #leastsq, leastsq-parallel, none
-nb_nodes=6         #Number of nodes for the leastsq-parallel mode
+opt_method='basinhopping'  #leastsq, leastsq-parallel, basinhopping, none
+nb_nodes=10         #Number of nodes for the leastsq-parallel and basinhopping modes
+temperature=100      #Temperature for basinhopping algorithm
+basin_iter=1000   #Number of iterations for basinhopping algorithm
 
 #Defines the colors for the graphs
 color_obs='r'       #color for the observations
