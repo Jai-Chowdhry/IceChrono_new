@@ -1,8 +1,8 @@
 self.calc_a=False           #Use False for now.
 self.calc_tau=False         #Use False for now.
 self.calc_LID=False         #Use False for now.
-self.corr_tau_nodes=52 #Define the number of nodes of the thinning function.
-self.age_step=5000.	#Define the age step for the LID and accu correction functions.
+self.corr_tau_nodes=8  #Define the number of nodes of the thinning function.
+self.age_step=2500.	#Define the age step for the LID and accu correction functions.
 self.Dfirn=0.7            #Average density of the firn
 self.start='default'  #default, restart or random
 
@@ -10,6 +10,13 @@ self.start='default'  #default, restart or random
 self.lambda_tau=70
 self.lambda_a=4000
 self.lambda_LID=4000
+self.lambda_tuning = 1000
+
+#Parameters for synchronization
+self.MC_init_width= 1.
+
+#self.synchro_step=1000 #For multi-core synchro
+#self.tuning_target_sigma=10
 #self.cT1=0.01
 #self.cT3=0.15
 #self.sigmam=0.15

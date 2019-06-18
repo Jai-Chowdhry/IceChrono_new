@@ -9,63 +9,42 @@
 #TODO: the reading of observations does not work if there is only one observation (since the read matrix is 1D in this case).
 #TODO: is there really a computation gain with the change of variable for the correction functions? Avoiding this change of variables would make the code easier to understand. I think there is no gain since solving A^-1 b when we have the LU factorisation of A does not cost more than computing A^-1 * b when we have computed A^-1.
 
-#TODO: Comment all lines for implementation of orbital tuning.
-
-def interp1d_extrap(x,y):
-    def f(xp):
-        g=interp1d(x,y, bounds_error=False)
-        return np.where(xp<x[0],y[0],np.where(xp>x[-1],y[-1],g(xp)))    
-    return f
-
-def interp1d_extrap_linear(x,y):
-    def f(xp):
-        g=interp1d(x,y, bounds_error=False)
-        return np.where(xp<x[0],(xp-x[0])*(y[1]-y[0])/(x[1]-x[0])+x[0],np.where(xp>x[-1],(xp-x[-1])*(y[-1]-y[-2])/(x[-1]-x[-2])+x[-1],g(xp)))
-    return f
-
-def interp1d_lin_aver_extrap(x, y):
-    def f(xp):
-        yp=np.nan*np.zeros(np.size(xp)-1)
-        if xp[0]<min(x):
-            xmod=np.concatenate((np.array([xp[0]]),x))
-            ymod=np.concatenate((np.array([y[0]]),y))
-        else:
-            xmod=x+0
-            ymod=y+0
-        if xp[-1]>max(x):
-            xmod=np.concatenate((xmod,np.array([xp[-1]])))
-            ymod=np.concatenate((ymod,np.array([y[-1]])))
-        for i in range(np.size(xp)-1):
-            xx=xmod[np.where(np.logical_and(xmod>xp[i],xmod<xp[i+1]))]
-            xx=np.concatenate((np.array([xp[i]]),xx,np.array([xp[i+1]])))
-            f=interp1d(xmod,ymod)
-            yy=f(xx)
-            yp[i]=np.sum((yy[1:]+yy[:-1])/2*(xx[1:]-xx[:-1]))/(xp[i+1]-xp[i])
-        return yp
-
-    return f
-
-def interp1d_stair_aver_extrap(x, y):
-    def f(xp):
+def interp_lin_aver(xp, x, y):
+    yp=np.nan*np.zeros(np.size(xp)-1)
+    if xp[0]<min(x):
+        xmod=np.concatenate((np.array([xp[0]]),x))
+        ymod=np.concatenate((np.array([y[0]]),y))
+    else:
         xmod=x+0
         ymod=y+0
-        if xp[0]<x[0]:
-            xmod=np.concatenate((np.array([xp[0]]),xmod))
-            ymod=np.concatenate((np.array([y[0]]),ymod))
-        if xp[-1]>x[-1]:
-            xmod=np.concatenate((xmod,np.array([xp[-1]])))
-            ymod=np.concatenate((ymod,np.array([y[-1]])))
-        yint=np.cumsum(np.concatenate((np.array([0]),ymod[:-1]*(xmod[1:]-xmod[:-1]))))
-        g=interp1d(xmod,yint)
-        yp=(g(xp[1:])-g(xp[:-1]))/(xp[1:]-xp[:-1])     #Maybe this is suboptimal since we compute twice g(xp[i])
-        return yp
+    if xp[-1]>max(x):
+        xmod=np.concatenate((xmod,np.array([xp[-1]])))
+        ymod=np.concatenate((ymod,np.array([y[-1]])))
+    for i in range(np.size(xp)-1):
+        xx=xmod[np.where(np.logical_and(xmod>xp[i],xmod<xp[i+1]))]
+        xx=np.concatenate((np.array([xp[i]]),xx,np.array([xp[i+1]])))
+        yy=np.interp(xx, xmod, ymod)
+        yp[i]=np.sum((yy[1:]+yy[:-1])/2*(xx[1:]-xx[:-1]))/(xp[i+1]-xp[i])
+    return yp
 
-    return f
+def interp_stair_aver(xp, x, y):
+    xmod=x+0
+    ymod=y+0
+    if xp[0]<x[0]:
+        xmod=np.concatenate((np.array([xp[0]]),xmod))
+        ymod=np.concatenate((np.array([y[0]]),ymod))
+    if xp[-1]>x[-1]:
+        xmod=np.concatenate((xmod,np.array([xp[-1]])))
+        ymod=np.concatenate((ymod,np.array([y[-1]])))
+    yint=np.cumsum(np.concatenate((np.array([0]),ymod[:-1]*(xmod[1:]-xmod[:-1]))))
+    yp=(np.interp(xp[1:], xmod, yint)-np.interp(xp[:-1], xmod, yint))/(xp[1:]-xp[:-1])     #Maybe this is suboptimal since we compute twice g(xp[i])
+    return yp
+
 
 def gaussian(x):
     return np.exp(-x**2/2)
 
-class Drilling:
+class Record:
 
     def __init__(self, dlabel):
         self.label=dlabel
@@ -90,14 +69,11 @@ class Drilling:
             self.iso_depth=readarray[:,0]
             if self.calc_a_method=='fullcorr':
                 self.iso_d18Oice=readarray[:,1]
-                f=interp1d_stair_aver_extrap(self.iso_depth, self.iso_d18Oice)
-                self.d18Oice=f(self.depth)
+                self.d18Oice=interp_stair_aver(self.depth, self.iso_depth, self.iso_d18Oice)
                 self.iso_deutice=readarray[:,2]
-                f=interp1d_stair_aver_extrap(self.iso_depth, self.iso_deutice)
-                self.deutice=f(self.depth)
+                self.deutice=interp_stair_aver(self.depth, self.iso_depth, self.iso_deutice)
                 self.iso_d18Osw=readarray[:,3]
-                f=interp1d_stair_aver_extrap(self.iso_depth, self.iso_d18Osw)
-                self.d18Osw=f(self.depth)
+                self.d18Osw=interp_stair_aver(self.depth, self.iso_depth, self.iso_d18Osw)
                 self.excess=self.deutice-8*self.d18Oice   # dans Uemura : d=excess
                 self.a=np.empty_like(self.deutice)
                 self.d18Oice_corr=self.d18Oice-self.d18Osw*(1+self.d18Oice/1000)/(1+self.d18Osw/1000)	#Uemura (1)
@@ -106,12 +82,10 @@ class Drilling:
                 self.deutice_fullcorr=self.deutice_corr+self.gamma_source/self.beta_source*self.excess_corr
             elif self.calc_a_method=='deut':
                 self.iso_deutice=readarray[:,1]
-                f=interp1d_stair_aver_extrap(self.iso_depth, self.iso_deutice)
-                self.deutice_fullcorr=f(self.depth)
+                self.deutice_fullcorr=interp_stair_aver(self.depth, self.iso_depth, self.iso_deutice)
             elif selc.calc_a_method=='d18O':
                 self.d18Oice=readarray[:,1]
-                f=interp1d_stair_aver_extrap(self.iso_depth, self.iso_d18Oice)
-                self.deutice_fullcorr=8*f(depth)
+                self.deutice_fullcorr=8*interp_stair_aver(self.depth, self.iso_depth, self.iso_d18Oice)
             else:
                 print 'Accumulation method not recognized'
                 quit()
@@ -123,12 +97,11 @@ class Drilling:
             if readarray.shape[1]>=3:
                 self.a_sigma=readarray[:,2]
             if self.accu_prior_rep=='staircase':
-                f=interp1d_stair_aver_extrap(self.a_depth, self.a_a)
+                self.a_model=interp_stair_aver(self.depth, self.a_depth, self.a_a)
             elif self.accu_prior_rep=='linear':
-                f=interp1d_lin_aver_extrap(self.a_depth,self.a_a)    #FIXME: We should implement a interp1d_lin_aver_extrap function
+                self.a_model=interp_lin_aver(self.depth, self.a_depth, self.a_a)
             else:
                 print 'Representation of prior accu scenario not recognized'
-            self.a_model=f(self.depth)
             self.a=self.a_model
 
 
@@ -142,8 +115,7 @@ class Drilling:
         if (np.size(readarray)==np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
         self.D_depth=readarray[:,0]
         self.D_D=readarray[:,1]
-        f=interp1d_extrap(self.D_depth, self.D_D)
-        self.D=f(self.depth_mid)
+        self.D=np.interp(self.depth_mid, self.D_depth, self.D_D)
 
         self.iedepth=np.cumsum(np.concatenate((np.array([0]), self.D*self.depth_inter)))
         self.iedepth_mid=(self.iedepth[1:]+self.iedepth[:-1])/2
@@ -165,11 +137,7 @@ class Drilling:
             self.LID_LID=readarray[:,1]
             if readarray.shape[1]>=3:
                 self.LID_sigma=readarray[:,2]
-        f=interp1d_extrap(self.LID_depth, self.LID_LID)
-        self.LID_model=f(self.depth)
-
-
-
+        self.LID_model=np.interp(self.depth, self.LID_depth, self.LID_LID)
 
         self.Ddepth=np.empty_like(self.depth)
         self.udepth=np.empty_like(self.depth)
@@ -187,8 +155,7 @@ class Drilling:
             self.tau_tau=readarray[:,1]
             if readarray.shape[1]>=3:
                 self.tau_sigma=readarray[:,2]
-            f=interp1d_extrap(self.tau_depth, self.tau_tau)
-            self.tau_model=f(self.depth_mid)
+            self.tau_model=np.interp(self.depth_mid, self.tau_depth, self.tau_tau)
             self.tau=self.tau_model
 
         self.raw_model()
@@ -198,7 +165,7 @@ class Drilling:
         if self.start=='restart':
             vartemp = np.loadtxt(datadir+self.label+'/restart.txt')
             xtemp = np.loadtxt(datadir+self.label+'/restart_x.txt')
-            corr_tau_length, corr_a_length, corr_LID_length = vartemp[0], vartemp[1], vartemp[2]
+            corr_tau_length, corr_a_length, corr_LID_length = int(vartemp[0]), int(vartemp[1]), int(vartemp[2])
             index = 3
             corr_tau_temp = vartemp[index:index + corr_tau_length]
             corr_a_temp = vartemp[index + corr_tau_length: index + corr_tau_length + corr_a_length]
@@ -206,12 +173,16 @@ class Drilling:
             corr_tau_x = xtemp[index:index + corr_tau_length]
             corr_a_x = xtemp[index + corr_tau_length: index + corr_tau_length + corr_a_length]
             corr_LID_x = xtemp[index + corr_tau_length + corr_a_length: index + corr_tau_length + corr_a_length + corr_LID_length]
-            interptau = interp1d_extrap(corr_tau_x, corr_tau_temp)
-            interpa = interp1d_extrap(corr_a_x,corr_a_temp)
-            interpLID = interp1d_extrap(corr_LID_x,corr_LID_temp)
-            self.corr_a = interpa(self.corr_a_age)
-            self.corr_tau = interptau(self.corr_tau_depth)
-            self.corr_LID = interpLID(self.corr_LID_age)
+            #interptau = interp1d_extrap(corr_tau_x, corr_tau_temp)
+            #interpa = interp1d_extrap(corr_a_x,corr_a_temp)
+            #interpLID = interp1d_extrap(corr_LID_x,corr_LID_temp)
+            #self.corr_a = interpa(self.corr_a_age)
+            #self.corr_tau = interptau(self.corr_tau_depth)
+            #self.corr_LID = interpLID(self.corr_LID_age)
+            self.corr_a = np.interp(self.corr_a_age, corr_a_x, corr_a_temp)
+            self.corr_tau = np.interp(self.corr_tau_depth, corr_tau_x, corr_tau_temp)
+            self.corr_LID = np.interp(self.corr_LID_age, corr_LID_x, corr_LID_temp)
+            gc.collect()
 
         elif self.start=='default':
             self.corr_a=np.zeros(np.size(self.corr_a_age))
@@ -239,28 +210,72 @@ class Drilling:
 ## Definition of the covariance matrix of the background
 
         try:
-            xx=np.where(self.a_depth<=self.depth[-1],self.fct_age_model(np.minimum(self.a_depth,self.depth[-1])),np.nan)
-            yy=np.where(self.a_depth<=self.depth[-1],self.a_sigma,np.nan)
-            f=interp1d_extrap(xx,yy) #, bounds_error=False, fill_value=self.a_sigma[-1])
-            self.sigmap_corr_a=f(self.corr_a_age)           #FIXME: we should average here since it would be more representative
+            self.sigmap_corr_a=np.ones(np.shape(self.corr_a_age))*np.mean(self.a_sigma)           #FIXME: we should average here since it would be more representative
+            #self.sigmap_corr_a=np.interp(self.corr_a_age, self.fct_age_model(self.a_depth), self.a_sigma)           #FIXME: we should average here since it would be more representative
         except AttributeError:
             print 'Sigma on prior accu scenario not defined in the accu-prior.txt file'
 
         try:
-            xx=np.where(self.LID_depth<=self.depth[-1],self.fct_airage_model(np.minimum(self.LID_depth,self.depth[-1])),np.nan)
-            xx=np.concatenate((np.array([self.age_top]),xx))
-            yy=np.where(self.LID_depth<=self.depth[-1],self.LID_sigma,np.nan)
-            yy=np.concatenate((np.array([self.LID_sigma[0]]),yy))
-            f=interp1d_extrap(xx,yy)  #, bounds_error=False, fill_value=self.LID_sigma[-1])
-            self.sigmap_corr_LID=f(self.corr_LID_age)           #FIXME: we should average here since it would be more representative
+            self.sigmap_corr_LID=np.ones(np.shape(self.corr_LID_age))*np.mean(self.LID_sigma)          #FIXME: we should average here since it would be more representative
+            #self.sigmap_corr_LID=np.interp(self.corr_LID_age, self.fct_airage_model(self.LID_depth) , self.LID_sigma)          #FIXME: we should average here since it would be more representative
         except AttributeError:
             print 'Sigma on prior LID scenario not defined in the LID-prior.txt file'
 
         try:
-            f=interp1d_extrap(self.tau_depth,self.tau_sigma)  #, bounds_error=False, fill_value=self.tau_sigma[-1])
-            self.sigmap_corr_tau=f(self.corr_tau_depth)           #FIXME: we should average here since it would be more representative
+            self.sigmap_corr_tau=np.ones(np.shape(self.corr_tau_depth))*np.mean(self.tau_sigma)           #FIXME: we should average here since it would be more representative
+            #self.sigmap_corr_tau=np.interp(self.corr_tau_depth, self.tau_depth, self.tau_sigma)           #FIXME: we should average here since it would be more representative
         except AttributeError:
             print 'Sigma on prior thinning scenario not defined in the thinning-prior.txt file'
+
+        self.tuning_depth = {}
+        self.tuning_proxy = {}
+        self.tuning_proxy_sigma = {}
+
+        self.tuning_age = {}
+        self.tuning_target = {}
+        self.tuning_target_sigma = {}
+        if not hasattr(self, 'tuning_uncertainty'):
+            self.tuning_uncertainty = {}
+
+        if hasattr(self, 'tuning_dict'):  # Tuning files
+            # print "loading tuning files"
+            for proxy, tag in self.tuning_dict.items():
+                filename = datadir + self.label + '/' + proxy + '.txt'  # Tuning proxies
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
+                        readarray = np.loadtxt(filename)
+                        if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
+                        self.tuning_depth.update({proxy: readarray[:, 0]})
+                        self.tuning_proxy.update({proxy: readarray[:, 1]})
+                        if np.shape(readarray)[1] is 3:
+                            self.tuning_proxy_sigma.update({proxy: readarray[:, 2]})
+                        else:
+                            self.tuning_proxy_sigma.update({proxy: np.zeros(np.size(self.tuning_proxy[proxy]))})
+
+                    else:
+                        raise ValueError('Tuning proxy file ' + element + '.txt not found in ' + datadir + self.label + '/')
+                if not hasattr(self, 'tuning_uncertainty'):
+                    self.tuning_uncertainty.update({proxy: 0})
+
+                if not self.tuning_multi[proxy]:
+                    filename = datadir + self.label + '/' + proxy + '_target.txt'  # Tuning targets
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
+                            readarray = np.loadtxt(filename)
+                            if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
+                            self.tuning_age.update({proxy: readarray[:, 0]})
+                            self.tuning_target.update({proxy: readarray[:, 1]})
+                            if np.shape(readarray)[1] is 3: self.tuning_target_sigma.update({proxy: readarray[:, 2]})
+
+                        else:
+                            raise ValueError(
+                                'Tuning target file ' + proxy + '_target.txt not found in ' + datadir + self.label + '/')
+
+            # print "tuning files loaded"
+        else:
+            self.tuning_dict = {}
 
         self.correlation_corr_a_before=self.correlation_corr_a+0
         self.correlation_corr_LID_before=self.correlation_corr_LID+0
@@ -282,13 +297,11 @@ class Drilling:
             self.chol_tau=cholesky(self.correlation_corr_tau)
 
         self.variables=np.array([])
-        #        if self.calc_a==True:
-        #            self.variables=np.concatenate((self.variables, np.array([self.A0]), np.array([self.beta])))
-        #        if self.calc_tau==True:
-        #            self.variables=np.concatenate((self.variables, np.array([self.pprime]), np.array([self.muprime])))
-        self.variables = np.concatenate((self.variables, self.corr_tau, self.corr_a, self.corr_LID))
-        self.sigmap_all=np.array([])
-        self.sigmap_all=np.concatenate((self.sigmap_all, self.sigmap_corr_tau, self.sigmap_corr_a, self.sigmap_corr_LID))
+#        if self.calc_a==True:
+#            self.variables=np.concatenate((self.variables, np.array([self.A0]), np.array([self.beta])))
+#        if self.calc_tau==True:
+#            self.variables=np.concatenate((self.variables, np.array([self.pprime]), np.array([self.muprime])))
+        self.variables=np.concatenate((self.variables, self.corr_tau, self.corr_a, self.corr_LID))
 
 #Reading of observations
 
@@ -366,57 +379,17 @@ class Drilling:
                 self.Ddepth_Ddepth=np.array([])
                 self.Ddepth_sigma=np.array([])
 
-        self.tuning_depth = {}
-        self.tuning_proxy = {}
-        self.tuning_proxy_sigma = {}
-
-        self.tuning_age = {}
-        self.tuning_target = {}
-        self.tuning_target_sigma = {}
-        if not hasattr(self,'tuning_uncertainty'):
-            self.tuning_uncertainty={}
-
-        if hasattr(self,'dict'):  # Tuning files
-            for proxy, tag in self.dict.items():
-                filename = datadir+self.label+'/' + proxy + '.txt'   # Tuning proxies
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
-                        readarray = np.loadtxt(filename)
-                        if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
-                        self.tuning_depth.update({proxy: readarray[:, 0]})
-                        self.tuning_proxy.update({proxy: readarray[:, 1]})
-                        self.tuning_proxy_sigma.update({proxy: readarray[:, 2]})
-
-                    else:
-                        raise ValueError('Tuning proxy file ' + element + '.txt not found in ' + datadir+self.label+'/')
-                if not hasattr(self, 'tuning_uncertainty'):
-                    self.tuning_uncertainty.update({proxy:0})
-
-                filename = datadir + self.label + '/' + proxy + '_target.txt'  # Tuning targets
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
-                        readarray = np.loadtxt(filename)
-                        if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
-                        self.tuning_age.update({proxy: readarray[:, 0]})
-                        self.tuning_target.update({proxy: readarray[:, 1]})
-                        self.tuning_target_sigma.update({proxy: readarray[:, 2]})
-
-                    else:
-                        raise ValueError('Tuning target file ' + element + '_target.txt not found in ' + datadir+self.label+'/')
-        else:
-            self.dict = {}
-
         self.icemarkers_correlation=np.diag(np.ones(np.size(self.icemarkers_depth)))
         self.airmarkers_correlation=np.diag(np.ones(np.size(self.airmarkers_depth)))
         self.iceintervals_correlation=np.diag(np.ones(np.size(self.iceintervals_depthtop)))
         self.airintervals_correlation=np.diag(np.ones(np.size(self.airintervals_depthtop)))
         self.Ddepth_correlation=np.diag(np.ones(np.size(self.Ddepth_depth)))
 
-        self.tuning_correlation = {}
-        for proxy, tag in self.dict.items():
-                self.tuning_correlation.update({proxy: np.diag(np.ones(np.size(self.tuning_proxy[proxy])))})
+        if self.calc_corr_tuning:
+            if not hasattr(self, 'tuning_correlation'):
+                self.tuning_correlation = {}
+                for proxy, tag in self.tuning_dict.items():
+                    self.tuning_correlation.update({proxy: np.diag(np.ones(np.size(self.tuning_proxy[proxy])))})
 
         filename=datadir+'/parameters-CovarianceObservations-AllDrillings.py'
         if os.path.isfile(filename):
@@ -439,13 +412,22 @@ class Drilling:
         if np.size(self.Ddepth_depth)>0:
             self.Ddepth_chol=cholesky(self.Ddepth_correlation)
             self.Ddepth_lu_piv=scipy.linalg.lu_factor(np.transpose(self.Ddepth_chol))
-        if np.size(self.tuning_proxy)>0:  # Tuning correlation matrix
-            self.tuning_chol={}
-            self.tuning_lu_piv={}
-            for proxy, tag in self.dict.items():
-                temp_chol = cholesky(self.tuning_correlation[proxy])
-                self.tuning_chol.update({proxy: temp_chol})
-                self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(np.transpose(temp_chol))})
+        if self.calc_corr_tuning:
+            if np.size(self.tuning_proxy)>0:  # Tuning correlation matrix
+                self.tuning_lu_piv={}
+                for proxy, tag in self.tuning_dict.items():
+                    #print np.shape(self.tuning_correlation[proxy])
+                    if not hasattr(self, 'tuning_matrices'):
+                        self.tuning_matrices = 'dense'
+                    if self.tuning_matrices == 'sparse':
+                        self.matrix_csc = scipy.sparse.csc_matrix(self.tuning_correlation[proxy])
+                        self.temp_chol = cholesky_sparse(self.matrix_csc)
+                        self.tuning_chol = self.temp_chol.L()
+                        self.tuning_lu_piv.update({proxy: scipy.sparse.linalg.splu(self.tuning_chol)})
+                    else:
+                        self.temp_chol = cholesky(self.tuning_correlation[proxy])
+                        self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(np.transpose(self.temp_chol))})
+        gc.collect()
 
 
     def raw_model(self):
@@ -467,22 +449,20 @@ class Drilling:
 
         #udepth
         self.udepth_model=self.udepth_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau_model*self.depth_inter)))
-        
-        g_model=interp1d(self.iedepth, self.udepth_model)
+
         self.LIDIE_model=self.LID_model*self.Dfirn
-        self.ULIDIE_model=g_model(self.LIDIE_model)
-        i_model=interp1d(self.udepth_model, self.depth)
+        self.ULIDIE_model=np.interp(self.LIDIE_model, self.iedepth, self.udepth_model)
 
         #Ice age
         self.icelayerthick_model=self.tau_model*self.a_model/self.D
         self.age_model=self.age_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau_model/self.a_model*self.depth_inter)))
-            
-        f_model=interp1d(self.depth, self.age_model, bounds_error=False, fill_value=np.nan)
+
 
         #air age
-        self.ice_equiv_depth_model=i_model(np.where(self.udepth_model-self.ULIDIE_model>self.udepth_top, self.udepth_model-self.ULIDIE_model, np.nan))  
+#        self.ice_equiv_depth_model=i_model(np.where(self.udepth_model-self.ULIDIE_model>self.udepth_top, self.udepth_model-self.ULIDIE_model, np.nan))
+        self.ice_equiv_depth_model=np.interp(self.udepth_model-self.ULIDIE_model, self.udepth_model, self.depth)
         self.Ddepth_model=self.depth-self.ice_equiv_depth_model
-        self.airage_model=f_model(self.ice_equiv_depth_model)
+        self.airage_model=np.interp(self.ice_equiv_depth_model, self.depth, self.age_model, left=np.nan, right=np.nan)
         self.airlayerthick_model=1/np.diff(self.airage_model)
 
     def corrected_model(self):
@@ -507,32 +487,25 @@ class Drilling:
 
 
         #Accu
-        #print np.shape(self.chol_a)
-        #print np.shape(self.corr_a)
-        corr=np.dot(self.chol_a,self.corr_a)*self.sigmap_corr_a
-        j=interp1d_extrap(self.corr_a_age, corr)
-        self.a=self.a_model*np.exp(j(self.age_model[:-1])) #FIXME: we should use mid-age and not age
+        corr1=np.dot(self.chol_a,self.corr_a)
+        corr=corr1*self.sigmap_corr_a
+        self.a=self.a_model*np.exp(np.interp(self.age_model[:-1], self.corr_a_age, corr)) #FIXME: we should use mid-age and not age
 
         #Thinning
-        h=interp1d(self.corr_tau_depth, np.dot(self.chol_tau,self.corr_tau)*self.sigmap_corr_tau)
-        self.tau=self.tau_model*np.exp(h(self.depth_mid))
+        self.tau=self.tau_model*np.exp(np.interp(self.depth_mid, self.corr_tau_depth, np.dot(self.chol_tau,self.corr_tau)*self.sigmap_corr_tau))
         self.udepth=self.udepth_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau*self.depth_inter)))
-        g=interp1d_extrap(self.iedepth, self.udepth)
         corr=np.dot(self.chol_LID,self.corr_LID)*self.sigmap_corr_LID
-        j=interp1d_extrap(self.corr_LID_age, corr)
-        self.LID=self.LID_model*np.exp(j(self.age_model))
+        self.LID=self.LID_model*np.exp(np.interp(self.age_model, self.corr_LID_age, corr))
         self.LIDIE=self.LID*self.Dfirn
-        self.ULIDIE=g(self.LIDIE)
-        i=interp1d(self.udepth, self.depth)
+        self.ULIDIE=np.interp(self.LIDIE, self.iedepth, self.udepth)
 
         #Ice age
         self.icelayerthick=self.tau*self.a/self.D
         self.age=self.age_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau/self.a*self.depth_inter)))
-        f=interp1d(self.depth,self.age, bounds_error=False, fill_value=np.nan)
 
-        self.ice_equiv_depth=i(np.where(self.udepth-self.LIDIE>self.udepth_top, self.udepth-self.LIDIE, np.nan))
+        self.ice_equiv_depth=np.interp(self.udepth-self.ULIDIE, self.udepth, self.depth)
         self.Ddepth=self.depth-self.ice_equiv_depth
-        self.airage=f(self.ice_equiv_depth)
+        self.airage=np.interp(self.ice_equiv_depth, self.depth,self.age, left=np.nan, right=np.nan)
         self.airlayerthick=1/np.diff(self.airage)
 
 
@@ -552,7 +525,7 @@ class Drilling:
 #            index=index+2
         self.corr_tau=variables[index:index+np.size(self.corr_tau)]
         self.corr_a=variables[index+np.size(self.corr_tau):index+np.size(self.corr_tau)+np.size(self.corr_a)]
-        self.corr_LID=variables[index+np.size(self.corr_tau)+np.size(self.corr_a): index+np.size(self.corr_tau)+np.size(self.corr_a)+np.size(self.corr_LID)]
+        self.corr_LID=variables[index+np.size(self.corr_tau)+np.size(self.corr_a):index+np.size(self.corr_tau)+np.size(self.corr_a)+np.size(self.corr_LID)]
 
         ##Raw model
 
@@ -576,99 +549,174 @@ class Drilling:
         self.Ddepth_init=self.Ddepth
 
     def fct_age(self, depth):
-        f=interp1d(self.depth,self.age)
-        return f(depth)
+        return np.interp(depth, self.depth, self.age)
 
     def fct_age_init(self, depth):
-        f=interp1d(self.depth,self.age_init)
-        return f(depth)
+        return np.interp(depth, self.depth, self.age_init)
    
     def fct_age_model(self, depth):
-        f=interp1d(self.depth,self.age_model)
-        return f(depth)
+        return np.interp(depth, self.depth,self.age_model)
    
-    def fct_airage(self, depth): #Fixme: should this be interp1d_extrap?
-        f=interp1d(self.depth,self.airage)
-        return f(depth)
+    def fct_airage(self, depth):
+        return np.interp(depth, self.depth, self.airage)
 
-    def fct_airage_init(self, depth): #Fixme: should this be interp1d_extrap? or interp1d?
-        f=interp1d(self.depth,self.airage_init)
-        return f(depth)
+    def fct_airage_init(self, depth):
+        return np.interp(depth, self.depth, self.airage_init)
 
     def fct_airage_model(self, depth):
-        f=interp1d(self.depth,self.airage_model)
-        return f(depth)
+        return np.interp(depth, self.depth, self.airage_model)
 
     def fct_tuning_target(self,age,proxy):  # New for tuning
-        f = interp1d_extrap(self.tuning_age[proxy], self.tuning_target[proxy])
-        return f(age)
+        #f = interp1d_extrap(self.tuning_age[proxy], self.tuning_target[proxy])
+        #return f(age)
+        return np.interp(age, self.tuning_age[proxy], self.tuning_target[proxy])
 
     def fct_tuning_sigma(self,age,proxy):
-        f = interp1d_extrap(self.tuning_age[proxy], self.tuning_target_sigma[proxy])
-        return f(age)
+        #f = interp1d_extrap(self.tuning_age[proxy], self.tuning_target_sigma[proxy])
+        #return f(age)
+        if proxy in self.tuning_target_sigma:
+            return np.interp(age, self.tuning_age[proxy], self.tuning_target_sigma[proxy]) #Fixme: the sigmas should increase away from points!!
+        else:
+            return np.zeros(np.shape(age))
 
     def fct_Ddepth(self, depth):
-        f=interp1d(self.depth,self.Ddepth)
-        return f(depth)
+        return np.interp(depth, self.depth, self.Ddepth)
 
-    def residuals(self, variables):
-        self.model(variables)
-
-        if hasattr(self, 'tuning_correlation'):
-            self.tuning_correlation_before=self.tuning_correlation.copy()
-
-        filename=datadir+self.label+'/parameters-CovarianceTuning.py'
+    def synchro_covar(self):
+        filename = datadir + self.label + '/parameters-CovarianceTuning.py'
         if os.path.isfile(filename):
             execfile(filename)
+        else:
+            if np.size(self.tuning_proxy)>0:
+                self.tuning_correlation = {}
+                for proxy, tag in self.tuning_dict.items():
+                    self.tuning_correlation.update({proxy: np.diag(np.ones(np.size(self.tuning_proxy[proxy])))})
+        if self.calc_corr_tuning:
+            if np.size(self.tuning_proxy)>0:  # Tuning correlation matrix
+                self.tuning_lu_piv={}
+                for proxy, tag in self.tuning_dict.items():
+                    #print np.shape(self.tuning_correlation[proxy])
+                    if not hasattr(self, 'tuning_matrices'):
+                        self.tuning_matrices = 'dense'
+                    if self.tuning_matrices == 'sparse':
+                        self.matrix_csc = scipy.sparse.csc_matrix(self.tuning_correlation[proxy])
+                        self.temp_chol = cholesky_sparse(self.matrix_csc)
+                        self.tuning_chol = self.temp_chol.L()
+                        self.tuning_lu_piv.update({proxy: scipy.sparse.linalg.splu(self.tuning_chol)})
+                    else:
+                        self.temp_chol = cholesky(self.tuning_correlation[proxy])
+                        self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(np.transpose(self.temp_chol))})
 
-        for proxy in self.dict.keys():  # Synchronization correlation matrix
-            if not np.array_equal(self.tuning_correlation_before[proxy],self.tuning_correlation[proxy]):
-                self.tuning_chol.update({proxy:np.array([])})
-                self.tuning_lu_piv.update({proxy:np.array([])})
-                if np.size(self.tuning_correlation[proxy]) > 0:
-                    self.tuning_chol.update({proxy: cholesky(self.tuning_correlation[proxy])})
-                    self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(self.tuning_chol[proxy])})
+
+    def multi_synchro(self,proxy):
+            for drilling in list_drillings:
+                if proxy in D[drilling].tuning_dict and self.label != drilling:
+                    if self.tuning_dict[proxy] == 'air':
+                        temp_age = D[drilling].fct_airage(D[drilling].tuning_depth[proxy])
+                    elif self.tuning_dict[proxy] == 'ice':
+                        temp_age = D[drilling].fct_age(D[drilling].tuning_depth[proxy])
+                    else: print("Tuning age scale not recognized. Try 'ice' or 'air'.")
+                    self.tuning_age.update({proxy: temp_age})
+                    self.tuning_target.update({proxy: D[drilling].tuning_proxy[proxy]}) #FIXME: this doesn't need to be updated every time
+                    #for index,age in enumerate(temp_age):
+                    #    tempdict.update({age: D[drilling].tuning_proxy[proxy][index]})
+            #temparray = np.array(sorted(tempdict.items())) #FIXME: need to find a way to put the stack in chrono order without breaking non-monotonicity...
+            #temparray = np.concatenate((temp_age, D[drilling].tuning_proxy[proxy]))
+            if hasattr(self,"synchro_step"):
+                fage = np.arange(min(temparray[:,0]),max(temparray[:,0]),self.synchro_step) #FIXME!!!
+                ftarget = np.interp(fage,temparray[:,0],temparray[:,1])
+                self.tuning_age.update({proxy:fage})
+                self.tuning_target.update({proxy:ftarget})
+            #else:
+                #self.tuning_age.update({proxy: temparray[:,0]})
+                #self.tuning_age.update({proxy: temp_age})
+                #self.tuning_target.update({proxy: temparray[:,1]})
+                #self.tuning_target.update({proxy: D[drilling].tuning_proxy[proxy]})
+
+
+
+    def residuals(self, variables):
+        #time0 = time.time()
+        self.model(self.variables)
+        if np.any(self.tuning_multi.values()):
+            for drilling in list_drillings:
+                D[drilling].model(D[drilling].variables)
+
+        if hasattr(self, 'tuning_correlation') and self.calc_corr_tuning:
+            self.tuning_correlation_before=self.tuning_correlation.copy()
+
+        if self.calc_corr_tuning:
+            for proxy in self.tuning_dict.keys():  # Synchronization correlation matrix
+                if not np.array_equal(self.tuning_correlation_before[proxy],self.tuning_correlation[proxy]):
+                    self.tuning_chol.update({proxy:np.array([])})
+                    self.tuning_lu_piv.update({proxy:np.array([])})
+                    if np.size(self.tuning_correlation[proxy]) > 0:
+                        if self.tuning_matrices == 'sparse':
+                            self.matrix_csc = scipy.sparse.csc_matrix(self.tuning_correlation[proxy])
+                            self.tuning_chol.update({proxy: cholesky_sparse(self.matrix_csc)})
+                            self.tuning_lu_piv.update({proxy: scipy.sparse.linalg.splu(self.tuning_chol[proxy].L())})
+                        else:
+                            self.tuning_chol.update({proxy: cholesky(self.tuning_correlation[proxy])})
+                            self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(self.tuning_chol[proxy])})
 
         resi_corr_a=self.corr_a
         resi_corr_LID=self.corr_LID
         resi_corr_tau=self.corr_tau
         resi_age=(self.fct_age(self.icemarkers_depth)-self.icemarkers_age)/self.icemarkers_sigma
+
+        if np.isnan(np.concatenate((resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age))).any(): #Patch for infinite residuals
+            return np.array([np.inf])
+
+        elif np.isinf(np.concatenate((resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age))).any():
+            return np.array([np.inf])
+
         if np.size(self.icemarkers_depth)>0:
             resi_age=scipy.linalg.lu_solve(self.icemarkers_lu_piv,resi_age)
         resi_airage=(self.fct_airage(self.airmarkers_depth)-self.airmarkers_age)/self.airmarkers_sigma
+        if np.isnan(resi_airage).any():
+            return np.array([np.inf])
         if np.size(self.airmarkers_depth)>0:
             resi_airage=scipy.linalg.lu_solve(self.airmarkers_lu_piv,resi_airage)
         resi_iceint=(self.fct_age(self.iceintervals_depthbot)-self.fct_age(self.iceintervals_depthtop)-self.iceintervals_duration)/self.iceintervals_sigma
+        if np.isnan(resi_iceint).any():
+            return np.array([np.inf])
         if np.size(self.iceintervals_depthtop)>0:
             resi_iceint=scipy.linalg.lu_solve(self.iceintervals_lu_piv,resi_iceint)
         resi_airint=(self.fct_airage(self.airintervals_depthbot)-self.fct_airage(self.airintervals_depthtop)-self.airintervals_duration)/self.airintervals_sigma
+        if np.isnan(resi_airint).any():
+            return np.array([np.inf])
         if np.size(self.airintervals_depthtop)>0:
             resi_airint=scipy.linalg.lu_solve(self.airintervals_lu_piv,resi_airint)
         resi_Ddepth=(self.fct_Ddepth(self.Ddepth_depth)-self.Ddepth_Ddepth)/self.Ddepth_sigma
+        if np.isnan(resi_Ddepth).any():
+            return np.array([np.inf])
         if np.size(self.Ddepth_depth)>0:
             resi_Ddepth=scipy.linalg.lu_solve(self.Ddepth_lu_piv,resi_Ddepth)
 
         resi_tuning = np.array([])
         if np.size(self.tuning_proxy)>0:
-            for proxy, tag in self.dict.items():
+            for proxy, tag in self.tuning_dict.items():
+                if self.tuning_multi[proxy]:
+                    self.multi_synchro(proxy=proxy)
                 if tag == 'ice':
                     try:
-                        resi_tuning_temp = (self.fct_tuning_target(self.fct_age(self.tuning_depth[proxy]), proxy)
-                                        - self.tuning_proxy[proxy]) / np.sqrt(self.tuning_proxy_sigma[proxy]**2
-                                                             + self.fct_tuning_sigma(self.fct_age(self.tuning_depth[proxy]),proxy)**2)
-                        # correlation = np.corrcoef(self.fct_tuning_target(self.fct_age(self.tuning_depth[proxy]), proxy),self.tuning_proxy[proxy])[0,1]
-                        # resi_tuning_temp *= (1-correlation)
+                        self.partone = self.fct_age(self.tuning_depth[proxy])
+                        self.parttwo = self.fct_tuning_target(self.partone, proxy)
+                        self.partfour = self.fct_tuning_sigma(self.partone, proxy)
+                        self.partfive = self.parttwo - self.tuning_proxy[proxy]
+                        self.partsix = np.sqrt(self.tuning_proxy_sigma[proxy] ** 2 + self.partfour ** 2 + self.tuning_uncertainty[proxy] ** 2)
+                        self.resi_tuning_temp = self.partfive / self.partsix
                     except ValueError as e:
                         e.args += ('Orbital tuning proxy may be out of provided target age range. Try giving older target ages.',)
                         raise
                 elif tag == 'air':
                     try:
-                        partone = self.fct_airage(self.tuning_depth[proxy])
-                        parttwo = self.fct_tuning_target(partone,proxy)
-                        partfour = self.fct_tuning_sigma(partone,proxy)
-                        self.partfive = parttwo-self.tuning_proxy[proxy]
-                        self.partsix = np.sqrt(self.tuning_proxy_sigma[proxy]**2 + partfour**2 + self.tuning_uncertainty[proxy]**2)
-                        resi_tuning_temp = self.partfive/self.partsix
+                        self.partone = self.fct_airage(self.tuning_depth[proxy])
+                        self.parttwo = self.fct_tuning_target(self.partone,proxy)
+                        self.partfour = self.fct_tuning_sigma(self.partone,proxy)
+                        self.partfive = self.parttwo-self.tuning_proxy[proxy]
+                        self.partsix = np.sqrt(self.tuning_proxy_sigma[proxy]**2 + self.partfour**2 + self.tuning_uncertainty[proxy]**2)
+                        self.resi_tuning_temp = self.partfive/self.partsix
                         # resi_tuning_temp = (self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]), proxy)
                         #                 - self.tuning_proxy[proxy]) / np.sqrt(self.tuning_proxy_sigma[proxy]**2
                         #                                      + self.fct_tuning_sigma(self.fct_airage(self.tuning_depth[proxy]),proxy)**2)
@@ -679,15 +727,157 @@ class Drilling:
                         raise
                 else: raise ValueError("'"+tag+
                                        "' age scale not recognized. Try 'ice' or 'air' in "+self.label+"/parameters.py")
+                #if self.tuning_multi[proxy]: #Mathematical hack to penalize rifting series
+                #    ageindex = np.where(self.partone > max(self.tuning_age))
+                #    ageindex2 = np.where(self.partone < min(self.tuning_age))
+                #    self.resi_tuning_temp[ageindex]*=2
+                #    self.resi_tuning_temp[ageindex2] *= 2
+                #if not all(z<=y for z, y in zip(self.partone, self.partone[1:])): #TODO included to impose monotonicity
+                #   self.resi_tuning_temp*=1.5
+                if self.calc_corr_tuning:
+                    if self.tuning_matrices == 'sparse':
+                        resi_tuning = np.append(resi_tuning,
+                                            (self.tuning_lu_piv[proxy].solve(self.resi_tuning_temp)))
+                    else:
+                        resi_tuning = np.append(resi_tuning,(scipy.linalg.lu_solve(self.tuning_lu_piv[proxy],self.resi_tuning_temp)))
+                else:
+                    resi_tuning = np.append(resi_tuning,self.resi_tuning_temp)#**(1/2.))
 
-                resi_tuning = np.append(resi_tuning,(scipy.linalg.lu_solve(self.tuning_lu_piv[proxy],resi_tuning_temp)))
+        #time1 = time.time()
+
+        #print 'Residuals calculated once in {} seconds'.format(time1-time0)
 
         return np.concatenate((resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age,resi_airage, resi_iceint, resi_airint, resi_Ddepth, resi_tuning))
 
+    def residuals_separated(self, variables):
+        # time0 = time.time()
+        self.model(self.variables)
+        if np.any(self.tuning_multi.values()):
+            for drilling in list_drillings:
+                D[drilling].model(D[drilling].variables)
 
-    def cost_function(self):
-        cost=np.dot(self.residuals,np.transpose(self.residuals))
-        return cost
+        if hasattr(self, 'tuning_correlation') and self.calc_corr_tuning:
+            self.tuning_correlation_before = self.tuning_correlation.copy()
+
+        if self.calc_corr_tuning:
+            for proxy in self.tuning_dict.keys():  # Synchronization correlation matrix
+                if not np.array_equal(self.tuning_correlation_before[proxy], self.tuning_correlation[proxy]):
+                    self.tuning_chol.update({proxy: np.array([])})
+                    self.tuning_lu_piv.update({proxy: np.array([])})
+                    if np.size(self.tuning_correlation[proxy]) > 0:
+                        if self.tuning_matrices == 'sparse':
+                            self.matrix_csc = scipy.sparse.csc_matrix(self.tuning_correlation[proxy])
+                            self.tuning_chol.update({proxy: cholesky_sparse(self.matrix_csc)})
+                            self.tuning_lu_piv.update({proxy: scipy.sparse.linalg.splu(self.tuning_chol[proxy].L())})
+                        else:
+                            self.tuning_chol.update({proxy: cholesky(self.tuning_correlation[proxy])})
+                            self.tuning_lu_piv.update({proxy: scipy.linalg.lu_factor(self.tuning_chol[proxy])})
+
+        resi_corr_a = self.corr_a
+        resi_corr_LID = self.corr_LID
+        resi_corr_tau = self.corr_tau
+        resi_age = (self.fct_age(self.icemarkers_depth) - self.icemarkers_age) / self.icemarkers_sigma
+
+        if np.isnan(np.concatenate(
+                (resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age))).any():  # Patch for infinite residuals
+            return np.array([np.inf])
+
+        elif np.isinf(np.concatenate((resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age))).any():
+            return np.array([np.inf])
+
+        if np.size(self.icemarkers_depth) > 0:
+            resi_age = scipy.linalg.lu_solve(self.icemarkers_lu_piv, resi_age)
+        resi_airage = (self.fct_airage(self.airmarkers_depth) - self.airmarkers_age) / self.airmarkers_sigma
+        if np.isnan(resi_airage).any():
+            return np.array([np.inf])
+        if np.size(self.airmarkers_depth) > 0:
+            resi_airage = scipy.linalg.lu_solve(self.airmarkers_lu_piv, resi_airage)
+        resi_iceint = (self.fct_age(self.iceintervals_depthbot) - self.fct_age(
+            self.iceintervals_depthtop) - self.iceintervals_duration) / self.iceintervals_sigma
+        if np.isnan(resi_iceint).any():
+            return np.array([np.inf])
+        if np.size(self.iceintervals_depthtop) > 0:
+            resi_iceint = scipy.linalg.lu_solve(self.iceintervals_lu_piv, resi_iceint)
+        resi_airint = (self.fct_airage(self.airintervals_depthbot) - self.fct_airage(
+            self.airintervals_depthtop) - self.airintervals_duration) / self.airintervals_sigma
+        if np.isnan(resi_airint).any():
+            return np.array([np.inf])
+        if np.size(self.airintervals_depthtop) > 0:
+            resi_airint = scipy.linalg.lu_solve(self.airintervals_lu_piv, resi_airint)
+        resi_Ddepth = (self.fct_Ddepth(self.Ddepth_depth) - self.Ddepth_Ddepth) / self.Ddepth_sigma
+        if np.isnan(resi_Ddepth).any():
+            return np.array([np.inf])
+        if np.size(self.Ddepth_depth) > 0:
+            resi_Ddepth = scipy.linalg.lu_solve(self.Ddepth_lu_piv, resi_Ddepth)
+
+        resi_tuning = np.array([])
+        if np.size(self.tuning_proxy) > 0:
+            for proxy, tag in self.tuning_dict.items():
+                if self.tuning_multi[proxy]:
+                    self.multi_synchro(proxy=proxy)
+                if tag == 'ice':
+                    try:
+                        self.partone = self.fct_age(self.tuning_depth[proxy])
+                        self.parttwo = self.fct_tuning_target(self.partone, proxy)
+                        self.partfour = self.fct_tuning_sigma(self.partone, proxy)
+                        self.partfive = self.parttwo - self.tuning_proxy[proxy]
+                        self.partsix = np.sqrt(
+                            self.tuning_proxy_sigma[proxy] ** 2 + self.partfour ** 2 + self.tuning_uncertainty[
+                                proxy] ** 2)
+                        self.resi_tuning_temp = self.partfive / self.partsix
+                    except ValueError as e:
+                        e.args += (
+                        'Orbital tuning proxy may be out of provided target age range. Try giving older target ages.',)
+                        raise
+                elif tag == 'air':
+                    try:
+                        self.partone = self.fct_airage(self.tuning_depth[proxy])
+                        self.parttwo = self.fct_tuning_target(self.partone, proxy)
+                        self.partfour = self.fct_tuning_sigma(self.partone, proxy)
+                        self.partfive = self.parttwo - self.tuning_proxy[proxy]
+                        self.partsix = np.sqrt(
+                            self.tuning_proxy_sigma[proxy] ** 2 + self.partfour ** 2 + self.tuning_uncertainty[
+                                proxy] ** 2)
+                        self.resi_tuning_temp = self.partfive / self.partsix
+                        # resi_tuning_temp = (self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]), proxy)
+                        #                 - self.tuning_proxy[proxy]) / np.sqrt(self.tuning_proxy_sigma[proxy]**2
+                        #                                      + self.fct_tuning_sigma(self.fct_airage(self.tuning_depth[proxy]),proxy)**2)
+                        # correlation = np.corrcoef(self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]), proxy),self.tuning_proxy[proxy])[0,1]
+                        # resi_tuning_temp *= (1-correlation)
+                    except ValueError as e:
+                        e.args += (
+                        'Orbital tuning proxy may be out of provided target age range. Try giving older target ages.',)
+                        raise
+                else:
+                    raise ValueError("'" + tag +
+                                     "' age scale not recognized. Try 'ice' or 'air' in " + self.label + "/parameters.py")
+                # if self.tuning_multi[proxy]: #Mathematical hack to penalize rifting series
+                #    ageindex = np.where(self.partone > max(self.tuning_age))
+                #    ageindex2 = np.where(self.partone < min(self.tuning_age))
+                #    self.resi_tuning_temp[ageindex]*=2
+                #    self.resi_tuning_temp[ageindex2] *= 2
+                # if not all(z<=y for z, y in zip(self.partone, self.partone[1:])): #TODO included to impose monotonicity
+                #   self.resi_tuning_temp*=1.5
+                if self.calc_corr_tuning:
+                    if self.tuning_matrices == 'sparse':
+                        resi_tuning = np.append(resi_tuning,
+                                                (self.tuning_lu_piv[proxy].solve(self.resi_tuning_temp)))
+                    else:
+                        resi_tuning = np.append(resi_tuning, (
+                            scipy.linalg.lu_solve(self.tuning_lu_piv[proxy], self.resi_tuning_temp)))
+                else:
+                    resi_tuning = np.append(resi_tuning, self.resi_tuning_temp)  # **(1/2.))
+
+        # time1 = time.time()
+
+        # print 'Residuals calculated once in {} seconds'.format(time1-time0)
+
+        return np.concatenate((resi_corr_a, resi_corr_LID, resi_corr_tau, resi_age,resi_airage, resi_iceint, resi_airint, resi_Ddepth)), resi_tuning #TODO this is a test
+
+
+    #def cost_function(self):
+    #    cost=np.dot(self.residuals,np.transpose(self.residuals))
+    #    return cost
 
     def jacobian(self):
         epsilon=np.sqrt(np.diag(self.hess))/100000000.
@@ -710,40 +900,62 @@ class Drilling:
         return self.variables, self.hess
       
         
-    def sigma(self):
+    def sigma(self): #FIXME should save these for restarts!
         jacob=self.jacobian()
 
         index=0
-        c_model=np.dot(jacob[index:index+np.size(self.age),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.age),:])))
-        self.sigma_age=np.sqrt(np.diag(c_model))
+        self.c_age=np.dot(jacob[index:index+np.size(self.age),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.age),:])))
+        self.sigma_age=np.sqrt(np.diag(self.c_age))
         index=index+np.size(self.age)
-        c_model=np.dot(jacob[index:index+np.size(self.airage),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.airage),:])))
-        self.sigma_airage=np.sqrt(np.diag(c_model))
+        self.c_airage=np.dot(jacob[index:index+np.size(self.airage),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.airage),:])))
+        self.sigma_airage=np.sqrt(np.diag(self.c_airage))
         index=index+np.size(self.airage)
-        c_model=np.dot(jacob[index:index+np.size(self.Ddepth),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.Ddepth),:])))
-        self.sigma_Ddepth=np.sqrt(np.diag(c_model))
+        self.c_Ddepth=np.dot(jacob[index:index+np.size(self.Ddepth),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.Ddepth),:])))
+        self.sigma_Ddepth=np.sqrt(np.diag(self.c_Ddepth))
         index=index+np.size(self.Ddepth)
-        c_model=np.dot(jacob[index:index+np.size(self.a),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.a),:])))
-        self.sigma_a=np.sqrt(np.diag(c_model))
+        self.c_a=np.dot(jacob[index:index+np.size(self.a),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.a),:])))
+        self.sigma_a=np.sqrt(np.diag(self.c_a))
         index=index+np.size(self.a)
-        c_model=np.dot(jacob[index:index+np.size(self.tau),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.tau),:])))
-        self.sigma_tau=np.sqrt(np.diag(c_model))
+        self.c_tau=np.dot(jacob[index:index+np.size(self.tau),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.tau),:])))
+        self.sigma_tau=np.sqrt(np.diag(self.c_tau))
         index=index+np.size(self.tau)
-        c_model=np.dot(jacob[index:index+np.size(self.LID),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.LID),:])))
-        self.sigma_LID=np.sqrt(np.diag(c_model))
+        self.c_LID=np.dot(jacob[index:index+np.size(self.LID),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.LID),:])))
+        self.sigma_LID=np.sqrt(np.diag(self.c_LID))
         index=index+np.size(self.LID)
-        c_model=np.dot(jacob[index:index+np.size(self.icelayerthick),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.icelayerthick),:])))
-        self.sigma_icelayerthick=np.sqrt(np.diag(c_model))
+        self.c_icelayerthick=np.dot(jacob[index:index+np.size(self.icelayerthick),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.icelayerthick),:])))
+        self.sigma_icelayerthick=np.sqrt(np.diag(self.c_icelayerthick))
         index=index+np.size(self.icelayerthick)
-        c_model=np.dot(jacob[index:index+np.size(self.airlayerthick),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.airlayerthick),:])))
-        self.sigma_airlayerthick=np.sqrt(np.diag(c_model))
+        self.c_airlayerthick=np.dot(jacob[index:index+np.size(self.airlayerthick),:],np.dot(self.hess,np.transpose(jacob[index:index+np.size(self.airlayerthick),:])))
+        self.sigma_airlayerthick=np.sqrt(np.diag(self.c_airlayerthick))
 
-        f=interp1d_extrap(self.corr_a_age, self.sigmap_corr_a)
-        self.sigma_a_model=f((self.age_model[1:]+self.age_model[:-1])/2)
-        f=interp1d_extrap(self.corr_LID_age, self.sigmap_corr_LID)
-        self.sigma_LID_model=f(self.age_model)
-        f=interp1d_extrap(self.corr_tau_depth, self.sigmap_corr_tau)
-        self.sigma_tau_model=f(self.depth_mid)
+
+        self.sigma_a_model=np.interp((self.age_model[1:]+self.age_model[:-1])/2, self.corr_a_age, self.sigmap_corr_a)
+        self.sigma_LID_model=np.interp(self.age_model, self.corr_LID_age, self.sigmap_corr_LID)
+        self.sigma_tau_model=np.interp(self.depth_mid, self.corr_tau_depth, self.sigmap_corr_tau)
+
+    def sigma_zero(self):
+
+        self.sigma_age=np.zeros_like(self.age)
+        print np.shape(self.sigma_age)
+        self.sigma_airage=np.zeros_like(self.airage)
+        print np.shape(self.sigma_airage)
+        self.sigma_Ddepth=np.zeros_like(self.Ddepth)
+        print np.shape(self.sigma_Ddepth)
+        print np.shape(self.depth_mid)
+        #self.sigma_a=np.zeros_like(self.a)
+        self.sigma_a = np.interp(self.depth_mid, self.a_depth, self.a_sigma) # We show the prior sigmas!
+        print np.shape(self.sigma_a)
+        #self.sigma_tau=np.zeros_like(self.tau)
+        self.sigma_tau = np.interp(self.depth_mid, self.tau_depth, self.tau_sigma)
+        print np.shape(self.sigma_tau)
+        #self.sigma_LID=np.zeros_like(self.LID)
+        self.sigma_LID = np.interp(self.depth, self.LID_depth,self.LID_sigma)
+        print np.shape(self.sigma_LID)
+        self.sigma_icelayerthick=np.zeros_like(self.icelayerthick)
+        self.sigma_airlayerthick=np.zeros_like(self.airlayerthick)
+        self.sigma_a_model=np.interp((self.age_model[1:]+self.age_model[:-1])/2, self.corr_a_age, self.sigmap_corr_a)
+        self.sigma_LID_model=np.interp(self.age_model, self.corr_LID_age, self.sigmap_corr_LID)
+        self.sigma_tau_model=np.interp(self.depth_mid, self.corr_tau_depth, self.sigmap_corr_tau)
 
         
     
@@ -965,51 +1177,50 @@ class Drilling:
         if not show_figures:
             mpl.close()
 
-        for proxy, tag in self.dict.items():
-            fig = mpl.figure(self.label + ' ' + proxy+ 'black')
-            ax = mpl.subplot(111)
-            ax.patch.set_facecolor((0.02,0.02,0.02))
-            #mpl.xlabel(tag + ' age (yr BP)')
-            #mpl.ylabel(proxy)
-            # Age at final depth, proxy value minus sigma, proxy value plus sigma
-            ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color='white', label='Target')
-            if tag == 'ice':
-                ax.plot(self.fct_age_init(self.tuning_depth[proxy]),self.tuning_proxy[proxy],'-',color='grey',label='Prior')
-                #ax.plot(self.fct_age(self.tuning_depth[proxy]), self.tuning_proxy[proxy], color='red', label='Posterior')
-            elif tag == 'air':
-                ax.plot(self.fct_airage_init(self.tuning_depth[proxy]), self.tuning_proxy[proxy],'-',color='grey', label='Prior')
-                #ax.plot(self.fct_airage(self.tuning_depth[proxy]), self.tuning_proxy[proxy], color='red', label='Posterior')
-
-            leg = mpl.legend(frameon=False,loc="best")
-            for text in leg.get_texts():
-                text.set_color("white")
-            ax.tick_params(axis='x', colors='white', top='off')
-            ax.tick_params(axis='y', colors='white', right='off')
-            fig.patch.set_facecolor((0.02, 0.02, 0.02))
-            pp = PdfPages(datadir + self.label + '/tuning' + proxy + 'black.pdf')
-            pp.savefig(mpl.figure(self.label + ' ' + proxy + 'black'),facecolor=fig.get_facecolor(), edgecolor='none')
-            pp.close()
-            if not show_figures:
-                mpl.close()
-
-        for proxy, tag in self.dict.items():
+        for proxy, tag in self.tuning_dict.items():
             fig = mpl.figure(self.label + ' ' + proxy)
             ax = mpl.subplot(111)
             #mpl.xlabel(tag + ' age (yr BP)')
             #mpl.ylabel(proxy)
             # Age at final depth, proxy value minus sigma, proxy value plus sigma
-            ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color='black', label='Target')
+            ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color="#3F5D7D", linewidth=0.3, label='Target')
+            if proxy in self.tuning_target_sigma:
+                ax.fill_between(self.tuning_age[proxy],
+                            self.tuning_target[proxy] - 2*self.tuning_target_sigma[proxy],
+                            self.tuning_target[proxy] + 2*self.tuning_target_sigma[proxy], color="#3F5D7D", alpha=0.5, linewidth=0.0)
+            leg = mpl.legend(frameon=False,loc="best")
             if tag == 'ice':
-                ax.plot(self.fct_age_init(self.tuning_depth[proxy]),self.tuning_proxy[proxy],'-',color='grey',label='Prior')
-                #ax.plot(self.fct_age(self.tuning_depth[proxy]), self.tuning_proxy[proxy], color='red', label='Posterior')
-            elif tag == 'air':
-                ax.plot(self.fct_airage_init(self.tuning_depth[proxy]), self.tuning_proxy[proxy],'-', color='grey', label='Prior')
-                #ax.plot(self.fct_airage(self.tuning_depth[proxy]), self.tuning_proxy[proxy], color='red', label='Posterior')
+                #ax.plot(self.fct_age_init(self.tuning_depth[proxy]),self.tuning_proxy[proxy],'-',color=(140 / 255., 86 / 255., 75 / 255.),label='Prior')
+                #ax.fill_between(self.fct_age_init(self.tuning_depth[proxy]),
+                #                self.tuning_proxy[proxy] - 2 * self.tuning_proxy_sigma[proxy],
+                #                self.tuning_proxy[proxy] + 2 * self.tuning_proxy_sigma[proxy],
+                #                facecolor=(140 / 255., 86 / 255., 75 / 255.), linewidth=0.0, alpha=0.5)
 
+                ax.plot(self.fct_age(self.tuning_depth[proxy]), self.tuning_proxy[proxy], linewidth=0.3, color=(20/255., 20/255., 20/255.), label=self.label)
+                #ax.fill_between(self.fct_age(self.tuning_depth[proxy]), self.tuning_proxy[proxy]-2*np.sqrt(self.tuning_proxy_sigma[proxy]**2+self.tuning_uncertainty[proxy]**2), self.tuning_proxy[proxy]+2*np.sqrt(self.tuning_proxy_sigma[proxy]**2+self.tuning_uncertainty[proxy]**2), facecolor=(140/255., 86/255., 75/255.),linewidth=0.0,alpha=0.5)
+                ax.fill_between(self.fct_age(self.tuning_depth[proxy]), self.tuning_proxy[proxy]-2*self.tuning_proxy_sigma[proxy], self.tuning_proxy[proxy]+2*self.tuning_proxy_sigma[proxy], facecolor=(140/255., 86/255., 75/255.),linewidth=0.0,alpha=0.5)
+            elif tag == 'air':
+                #ax.plot(self.fct_airage_init(self.tuning_depth[proxy]), self.tuning_proxy[proxy],'-', color=(20/255., 20/255., 20/255.), label='Prior')
+                #ax.fill_between(self.fct_airage_init(self.tuning_depth[proxy]),
+                                #self.tuning_proxy[proxy] - self.tuning_proxy_sigma[proxy],
+                                #self.tuning_proxy[proxy] + self.tuning_proxy_sigma[proxy],
+                                #facecolor=(140 / 255., 86 / 255., 75 / 255.), linewidth=0.0, alpha=0.5)
+
+                ax.plot(self.fct_airage(self.tuning_depth[proxy]), self.tuning_proxy[proxy], linewidth=0.3, color=(20/255., 20/255., 20/255.), label=self.label)
+                #ax.plot(self.fct_airage(self.tuning_depth[proxy]), np.abs(self.residuals_separated(self.variables)[1]), linewidth=0.3, color='red', label='Residuals')
+                #ax.plot(self.fct_airage(self.tuning_depth[proxy]), np.cumsum(self.residuals_separated(self.variables)[1]**2)/100000,
+                #        linewidth=0.3, color='pink', label='Cumulative Residuals /100000')
+                #ax.fill_between(self.fct_airage(self.tuning_depth[proxy]),self.tuning_proxy[proxy] - 2*np.sqrt(self.tuning_proxy_sigma[proxy]**2+self.tuning_uncertainty[proxy]**2), self.tuning_proxy[proxy] + 2*np.sqrt(self.tuning_proxy_sigma[proxy]**2+self.tuning_uncertainty[proxy]**2), facecolor=(140/255., 86/255., 75/255.),linewidth=0.0,alpha=0.5)
+                ax.fill_between(self.fct_airage(self.tuning_depth[proxy]),self.tuning_proxy[proxy] - 2*self.tuning_proxy_sigma[proxy], self.tuning_proxy[proxy] + 2*self.tuning_proxy_sigma[proxy], facecolor=(140/255., 86/255., 75/255.),linewidth=0.0,alpha=0.5)
             leg = mpl.legend(frameon=False,loc="best")
 
+            ax.tick_params(axis='x', top='off')
+            ax.tick_params(axis='y', right='off')
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+
             pp = PdfPages(datadir + self.label + '/tuning' + proxy + '.pdf')
-            pp.savefig(mpl.figure(self.label + ' ' + proxy),facecolor=fig.get_facecolor(), edgecolor='none')
+            pp.savefig(mpl.figure(self.label + ' ' + proxy),bbox_inches='tight')
             pp.close()
             if not show_figures:
                 mpl.close()
@@ -1024,12 +1235,43 @@ class Drilling:
         self.variables_x = np.concatenate((self.variables_x, self.corr_tau_depth, self.corr_a_age, self.corr_LID_age))
         np.savetxt(datadir+self.label+'/restart.txt',np.column_stack((len(self.corr_tau),len(self.corr_a),len(self.corr_LID), [np.transpose(self.variables)])))
         np.savetxt(datadir+self.label+'/restart_x.txt',np.column_stack((len(self.corr_tau),len(self.corr_a),len(self.corr_LID), [np.transpose(self.variables_x)])))
-    
+        if opt_method == 'MC' and MC_write:
+
+            print 'Writing MC results'
+            if not os.path.isdir(datadir + self.label + '/MC-ensemble'):
+                os.mkdir(datadir + self.label + '/MC-ensemble')
+            else:
+                shutil.rmtree(datadir + self.label + '/MC-ensemble')
+                os.mkdir(datadir + self.label + '/MC-ensemble')
+
+            for i in np.arange(len(steps.blobs)):
+                g = h5py.File(datadir + self.label + '/MC-ensemble/agedepth{}.hdf5'.format(str(i)), 'w')
+                for j, x in enumerate(steps.blobs[i]):
+                    g.create_dataset("agedepthMC{}".format(str(j)), shape=np.shape(x[self.label]),data=x[self.label], chunks=True, compression="gzip", compression_opts=9)
+                g.close()
+
+            # for i in np.arange(len(steps.blobs)):
+            #     if not os.path.isdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i))):
+            #         os.mkdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
+            #     else:
+            #         shutil.rmtree(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
+            #         os.mkdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
+            #     for j, x in enumerate(steps.blobs[i]):
+            #         np.savetxt("{}.txt".format(str(j)), x[self.label])
+
+            print 'MC results written'
+        for proxy, tag in self.tuning_dict.items(): #Fixme: only written for air
+            np.savetxt(datadir+self.label+'/{}_synchro_residuals.txt'.format(proxy),np.array([np.mean((self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]),proxy)-self.tuning_proxy[proxy])/self.tuning_proxy[proxy]),np.std((self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]),proxy)-self.tuning_proxy[proxy])/self.fct_tuning_target(self.fct_airage(self.tuning_proxy[proxy]),proxy))]))
+
+        if hasattr (self,'savecovariance') and self.savecovariance:
+            np.savez(datadir+self.label+'/covariance.npz',age=self.c_age,airage=self.c_airage,Ddepth=self.c_Ddepth,a=self.c_a,tau=self.c_tau,LID=self.c_LID,icelayerthick=self.c_icelayerthick,airlayerthick=self.c_airlayerthick)
+            print 'Posterior covariance saved for ' + self.label
+
 #    def udepth_save(self):
 #        np.savetxt(datadir+self.label+'/udepth.txt',self.udepth)
 
 
-class DrillingPair:
+class RecordPair:
 
     def __init__(self, D1, D2):
         self.D1=D1
@@ -1090,35 +1332,35 @@ class DrillingPair:
             self.airicemarkers_depth2=np.array([])
             self.airicemarkers_sigma=np.array([])
 
-        if hasattr(self,'dict'):  # Synchronization files
-            for record in self.D1, self.D2:
-                record.synchro_depth = {}
-                record.synchro_proxy = {}
-                record.synchro_sigma = {}
-                record.synchro_correlation = {}
-                record.synchro_std_series = {}
-                for proxy in self.dict.keys():
-                    filename = datadir+record.label+'/' + proxy + '.txt'   # Synchronization proxies
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
-                            readarray = np.loadtxt(filename)
-                            if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
-                            record.synchro_depth.update({proxy: readarray[:, 0]})
-                            record.synchro_proxy.update({proxy: readarray[:,1]})
-                            record.synchro_sigma.update({proxy: readarray[:,2]})
-                            if hasattr(self,'synchro_uncertainty'):
-                                record.synchro_sigma.update({proxy: np.sqrt(record.synchro_sigma[proxy]**2 + self.synchro_uncertainty[proxy]**2)})
-                            # record.synchro_std_series.update({proxy: np.std(record.synchro_proxy[proxy])})
-                            # synchro_sigma = readarray[:,2]
-                            # synchro_std_series = np.std(record.synchro_proxy[proxy])
-                            # record.synchro_sigma.update({proxy: np.sqrt(synchro_sigma**2+synchro_std_series**2)})
-                            record.synchro_correlation.update({proxy: np.diag(np.ones(np.size(self.D1.synchro_proxy[proxy]) + np.size(self.D1.synchro_proxy[proxy])))})
-                            print (record.label+' '+proxy+' record read with '+str(len(record.synchro_depth[proxy]))+ ' values')
-                        else:
-                            raise ValueError('Synchronization proxy file ' + proxy + '.txt not found in ' + datadir+record.label+'/')
-        else:
-            self.dict = {}
+        # if hasattr(self,'tuning_dict'):  # Synchronization files
+        #     for record in self.D1, self.D2:
+        #         record.synchro_depth = {}
+        #         record.synchro_proxy = {}
+        #         record.synchro_sigma = {}
+        #         record.synchro_correlation = {}
+        #         record.synchro_std_series = {}
+        #         for proxy in self.tuning_dict.keys():
+        #             filename = datadir+record.label+'/' + proxy + '.txt'   # Synchronization proxies
+        #             with warnings.catch_warnings():
+        #                 warnings.simplefilter("ignore")
+        #                 if os.path.isfile(filename) and open(filename).read() and np.size(np.loadtxt(filename)) > 0:
+        #                     readarray = np.loadtxt(filename)
+        #                     if (np.size(readarray) == np.shape(readarray)[0]): readarray.resize(1, np.size(readarray))
+        #                     record.synchro_depth.update({proxy: readarray[:, 0]})
+        #                     record.synchro_proxy.update({proxy: readarray[:,1]})
+        #                     record.synchro_sigma.update({proxy: readarray[:,2]})
+        #                     if hasattr(self,'synchro_uncertainty'):
+        #                         record.synchro_sigma.update({proxy: np.sqrt(record.synchro_sigma[proxy]**2 + self.synchro_uncertainty[proxy]**2)})
+        #                     # record.synchro_std_series.update({proxy: np.std(record.synchro_proxy[proxy])})
+        #                     # synchro_sigma = readarray[:,2]
+        #                     # synchro_std_series = np.std(record.synchro_proxy[proxy])
+        #                     # record.synchro_sigma.update({proxy: np.sqrt(synchro_sigma**2+synchro_std_series**2)})
+        #                     record.synchro_correlation.update({proxy: np.diag(np.ones(np.size(self.D1.synchro_proxy[proxy]) + np.size(self.D1.synchro_proxy[proxy])))})
+        #                     print (record.label+' '+proxy+' record read with '+str(len(record.synchro_depth[proxy]))+ ' values')
+        #                 else:
+        #                     raise ValueError('Synchronization proxy file ' + proxy + '.txt not found in ' + datadir+record.label+'/')
+        # else:
+        #     self.tuning_dict = {}
 
         # self.ln1 = {}
         # self.ln2 = {}
@@ -1166,40 +1408,42 @@ class DrillingPair:
             self.airicemarkers_chol=cholesky(self.airicemarkers_correlation)
             self.airicemarkers_lu_piv=scipy.linalg.lu_factor(self.airicemarkers_chol)
 
-        for record in self.D1, self.D2:
-            record.synchro_chol = {}
-            record.synchro_lu_piv = {}
-            for proxy in self.dict.keys(): # Synchronization correlation matrix
-                if np.size(record.synchro_proxy) > 0:
-                    record.synchro_chol.update({proxy: cholesky(record.synchro_correlation[proxy])})
-                    record.synchro_lu_piv.update({proxy: scipy.linalg.lu_factor(record.synchro_chol[proxy])})
-
-    def fct_synchro_proxy(self, age, record, proxy):
-        f = interp1d_extrap(record.synchro_age[proxy], record.synchro_proxy[proxy])
-        return f(age)
-
-    def fct_synchro_sigma(self, age, record, proxy):
-        f = interp1d_extrap(record.synchro_age[proxy], record.synchro_sigma[proxy])
-        return f(age)
+    #     for record in self.D1, self.D2:
+    #         record.synchro_chol = {}
+    #         record.synchro_lu_piv = {}
+    #         for proxy in self.tuning_dict.keys(): # Synchronization correlation matrix
+    #             if np.size(record.synchro_proxy) > 0:
+    #                 record.synchro_chol.update({proxy: cholesky(record.synchro_correlation[proxy])})
+    #                 record.synchro_lu_piv.update({proxy: scipy.linalg.lu_factor(record.synchro_chol[proxy])})
+    #
+    # def fct_synchro_proxy(self, age, record, proxy):
+    #     #f = interp1d_extrap(record.synchro_age[proxy], record.synchro_proxy[proxy])
+    #     #return f(age)
+    #     return np.interp(age, record.synchro_age[proxy], record.synchro_proxy[proxy])
+    #
+    # def fct_synchro_sigma(self, age, record, proxy):
+    #     #f = interp1d_extrap(record.synchro_age[proxy], record.synchro_sigma[proxy])
+    #     #return f(age)
+    #     return np.interp(age, record.synchro_age[proxy], record.synchro_sigma[proxy])
 
     def residuals(self):
-        for record in self.D1, self.D2:
+        '''for record in self.D1, self.D2:
             record.synchro_age = {}
 
-            for proxy, tag in self.dict.items():
+            for proxy, tag in self.tuning_dict.items():
                 if tag == 'ice':
                     check0 = record.synchro_depth[proxy]
                     check00 = record.fct_age(check0)
                     record.synchro_age.update({proxy: check00})
                 elif tag == 'air':
                     check0 = record.synchro_depth[proxy]
-                    check00 = record.fct_age(check0)
+                    check00 = record.fct_airage(check0)
                     record.synchro_age.update({proxy: check00})
 
         for record in self.D1, self.D2:
             if hasattr(record, 'synchro_correlation'):
                 record.synchro_correlation_before=record.synchro_correlation.copy()
-            for proxy in self.dict.keys(): #Fixme: This is probably not needed (number of points evaluated in residual remains the same...)
+            for proxy in self.tuning_dict.keys(): #Fixme: This is probably not needed (number of points evaluated in residual remains the same...)
                 record.synchro_correlation.update({proxy: np.diag(np.ones(np.size(record.synchro_age[proxy])))})
 
         filename=datadir+self.label+'/parameters-CovarianceTuning.py'
@@ -1207,22 +1451,20 @@ class DrillingPair:
             execfile(filename)
 
         for record in self.D1, self.D2:
-            for proxy in self.dict.keys():  # Synchronization correlation matrix
+            for proxy in self.tuning_dict.keys():  # Synchronization correlation matrix
                 if not np.array_equal(record.synchro_correlation_before[proxy],record.synchro_correlation[proxy]):
                     record.synchro_chol.update({proxy:np.array([])})
                     record.synchro_lu_piv.update({proxy:np.array([])})
                     if np.size(record.synchro_correlation[proxy]) > 0:
                         record.synchro_chol.update({proxy: cholesky(record.synchro_correlation[proxy])})
-                        record.synchro_lu_piv.update({proxy: scipy.linalg.lu_factor(record.synchro_chol[proxy])})
+                        record.synchro_lu_piv.update({proxy: scipy.linalg.lu_factor(record.synchro_chol[proxy])})'''
 
         #TODO: Make sure size of correlation matrix and size of synchronization residuals are coherent...
 
         resi_iceice=(self.D1.fct_age(self.iceicemarkers_depth1)-self.D2.fct_age(self.iceicemarkers_depth2))/self.iceicemarkers_sigma
         if np.size(self.iceicemarkers_depth1)>0:
             resi_iceice=scipy.linalg.lu_solve(self.iceicemarkers_lu_piv,resi_iceice)
-        a = self.D1.fct_airage(self.airairmarkers_depth1)
-        b = self.D2.fct_airage(self.airairmarkers_depth2)
-        resi_airair=(a-b)/self.airairmarkers_sigma
+        resi_airair=(self.D1.fct_airage(self.airairmarkers_depth1)-self.D2.fct_airage(self.airairmarkers_depth2))/self.airairmarkers_sigma
         if np.size(self.airairmarkers_depth1)>0:
             resi_airair=scipy.linalg.lu_solve(self.airairmarkers_lu_piv,resi_airair)
         resi_iceair=(self.D1.fct_age(self.iceairmarkers_depth1)-self.D2.fct_airage(self.iceairmarkers_depth2))/self.iceairmarkers_sigma
@@ -1232,10 +1474,10 @@ class DrillingPair:
         if np.size(self.airicemarkers_depth1)>0:
             resi_airice=scipy.linalg.lu_solve(self.airicemarkers_lu_piv,resi_airice)
 
-        resi_synchro = np.array([])
+        '''resi_synchro = np.array([])
 
         for record, alternate in (self.D1, self.D2),(self.D2, self.D1):
-            for proxy in self.dict.keys():  # Synchronization residuals
+            for proxy in self.tuning_dict.keys():  # Synchronization residuals
                 if len(record.synchro_age[proxy])>0:
                     checkone = record.synchro_proxy[proxy]
                     checkone_a=record.synchro_age[proxy]
@@ -1245,9 +1487,9 @@ class DrillingPair:
                     resi_synchro_temp = (checkone-checktwo) /\
                                         np.sqrt(checkthree+checkfour)
 
-                    resi_synchro = np.append(resi_synchro, scipy.linalg.lu_solve(record.synchro_lu_piv[proxy], resi_synchro_temp))
+                    resi_synchro = np.append(resi_synchro, scipy.linalg.lu_solve(record.synchro_lu_piv[proxy], resi_synchro_temp))'''
 
-        resi=np.concatenate((resi_iceice,resi_airair,resi_iceair,resi_airice,resi_synchro))
+        resi=np.concatenate((resi_iceice,resi_airair,resi_iceair,resi_airice))
 
         # self.fignum += 1
         # print self.fignum
@@ -1356,8 +1598,8 @@ class DrillingPair:
         if not show_figures:
             mpl.close()
 
-        if hasattr(self,'dict'): #Fixme: needs to be generalized for air and ice proxies
-            for proxy, tag in self.dict.items():
+        '''if hasattr(self,'tuning_dict'): #Fixme: needs to be generalized for air and ice proxies
+            for proxy, tag in self.tuning_dict.items():
                 mpl.figure(self.label+' '+proxy)
                 mpl.xlabel('Air age (yr BP)')
                 mpl.ylabel(proxy)
@@ -1381,7 +1623,7 @@ class DrillingPair:
                 if not show_figures:
                     mpl.close()
 
-                for proxy, tag in self.dict.items():
+                for proxy, tag in self.tuning_dict.items():
                     mpl.figure(self.label + ' ' + proxy)
                     mpl.xlabel('Air age (yr BP)')
                     mpl.ylabel(proxy)
@@ -1405,4 +1647,5 @@ class DrillingPair:
                     pp.savefig(mpl.figure(self.label + ' ' + proxy))
                     pp.close()
                     if not show_figures:
-                        mpl.close()
+                        mpl.close()'''
+

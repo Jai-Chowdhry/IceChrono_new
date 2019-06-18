@@ -1,9 +1,17 @@
-list_drillings=['EDC','EDML']
-
-opt_method='basinhopping'  #leastsq, leastsq-parallel, basinhopping, none
-nb_nodes=10         #Number of nodes for the leastsq-parallel and basinhopping modes
-temperature=100      #Temperature for basinhopping algorithm
-basin_iter=1000   #Number of iterations for basinhopping algorithm
+list_drillings=['EDC','TALDICE']
+opt_method='MC'  #leastsq, leastsq-parallel, MC, PT, basinhopping none
+mpi_activate=True #Use schwimmbad mpi implementation for parallel computing? Boolean
+nb_nodes=10         #Number of nodes for the leastsq-parallel, MC and basinhopping modes
+temperature=500      #Temperature for basinhopping algorithm
+ntemps = 4 #Number of temperatures for parallel tempering
+MC_iter=200000 #Number of iterations for basinhopping, PT or MC algorithms
+MC_walkers = 128
+MC_step = 0.2
+MC_thin = 0.01
+MC_write=False #Fixme we can get rid of this parameter because backend automatically writes...
+MC_adaptive=False
+MC_kombine=False
+MC_restart_backend=False
 
 #Defines the colors for the graphs
 color_obs='r'       #color for the observations
