@@ -1,0 +1,9 @@
+#FP ice age markers based on a match onto the EDC/deuterium record
+#run without isotope ties points
+540.6		14673		300
+562.4		38210		500
+574.0		46526		500
+589.0		54051		500
+592.4		59690		500
+
+

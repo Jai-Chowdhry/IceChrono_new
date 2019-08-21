@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/AICC2012-VLR/parameters.py" line="6" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c0cb6e98-e8aa-49a6-bc9d-e20e70d9e72d" name="Default" comment="Latest automated synchronization (tested, new analysis software)">
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-EDML/airice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-EDML/ice_depth-save.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-EDML/ice_depth2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-EDML/iceair_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-VK/airice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-VK/ice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDC-VK/iceair_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML-NGRIP/ice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/CH4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/LID-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/accu-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/air_age_intervals.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/density-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/ice_age_intervals.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/parameters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/EDML/thinning-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/TALDICE-EDML/airice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/TALDICE-EDML/iceair_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK-EDML/airice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK-EDML/iceair_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK-TALDICE/airice_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK-TALDICE/iceair_depth.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/LID-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/accu-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/air_age.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/air_age_intervals.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/density-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/ice_age.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/ice_age_intervals.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/parameters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/sigma-display.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/VK/thinning-prior.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/parameters-AllDrillings.py" beforeDir="false" afterPath="$PROJECT_DIR$/AICC2012-VLR/parameters-AllDrillings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AICC2012-VLR/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/AICC2012-VLR/parameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IceChrono.py" beforeDir="false" afterPath="$PROJECT_DIR$/IceChrono.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IceChronoClasses.py" beforeDir="false" afterPath="$PROJECT_DIR$/IceChronoClasses.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ages-interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/ages-interactive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/beampy-custom-theme.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/beampy-test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/comparison_manual.py" beforeDir="false" afterPath="$PROJECT_DIR$/comparison_manual.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mpitest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mpld3test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot-priors.py" beforeDir="false" />
+    </list>
+    <ignored path="IceChrono.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="IceChrono" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/IceChrono.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1386">
+              <caret line="63" selection-start-line="63" selection-end-line="75" selection-end-column="15" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/IceChronoClasses.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="13181">
+              <caret line="612" column="5" selection-start-line="612" selection-start-column="4" selection-end-line="635" selection-end-column="84" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Fletcher/parameters.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="21" selection-start-column="21" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/analysis.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="836">
+              <caret line="59" column="61" selection-start-line="59" selection-start-column="61" selection-end-line="59" selection-end-column="61" />
+              <folding>
+                <element signature="e#150#160#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Fletcher/FP/CH4_target.txt">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Fletcher/parameters-AllDrillings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="22" selection-start-column="22" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Fletcher/FP/parameters.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="440">
+              <caret line="20" column="37" selection-start-line="20" selection-start-column="37" selection-end-line="20" selection-end-column="37" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>pickle</find>
+      <find>print opt_method</find>
+      <find>MC_restart_backend</find>
+      <find>sparse</find>
+      <find>plot</find>
+      <find>restart</find>
+      <find>autocorr_time</find>
+      <find>self</find>
+      <find>tuning</find>
+      <find>self.LID</find>
+      <find>non-monotonic</find>
+      <find>order</find>
+      <find>np.interp</find>
+      <find>synchro</find>
+      <find>self.fct_tuning_sigma</find>
+      <find>in</find>
+      <find>keys</find>
+      <find>hasattr</find>
+      <find>tuning parameters</find>
+      <find>getattr</find>
+      <find>flat</find>
+      <find>backend</find>
+      <find>save</find>
+      <find>getcwd</find>
+      <find>if not mpi_activate</find>
+      <find>mpl.hist</find>
+      <find>MC_step</find>
+      <find>if self.tuning_multi</find>
+      <find>self.multi_synchro</find>
+      <find>multi_synchro</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>Record</replace>
+      <replace>D[dlabel]</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/CH4.txt" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/TALDICE/CH4.txt" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/air_age.txt" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE/ice_depth.txt" />
+        <option value="$PROJECT_DIR$/../MIS6-histograms/histograms.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/NGRIP/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/parameters-CovariancePrior-AllDrillings-init.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/TALDICE/parameters-CovariancePrior-AllDrillings-init.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/parameters-CovarianceTuning.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/TALDICE/parameters-CovarianceTuning.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/MC-ensemble/animator.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/animator.py" />
+        <option value="$PROJECT_DIR$/DEMove_modified.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/TALDICE/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC/parameters.py" />
+        <option value="$PROJECT_DIR$/Validation/EDC/ice_age.txt" />
+        <option value="$PROJECT_DIR$/Validation/VK/ice_age.txt" />
+        <option value="$PROJECT_DIR$/Validation/VK/air_age.txt" />
+        <option value="$PROJECT_DIR$/Validation/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/Validation/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE/air_depth-loulergue.txt" />
+        <option value="$PROJECT_DIR$/Validation/EDC/parameters.py" />
+        <option value="$PROJECT_DIR$/Validation/VK/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR-priors/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR-priors/EDC/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR-priors/TALDICE/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR-best/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR-best/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/plot-priors.py" />
+        <option value="$PROJECT_DIR$/mpld3test.py" />
+        <option value="$PROJECT_DIR$/bokehtest.py" />
+        <option value="$PROJECT_DIR$/beampy-custom-theme.py" />
+        <option value="$PROJECT_DIR$/src/beampy/beampy/themes/custom_theme.py" />
+        <option value="$PROJECT_DIR$/beampy-test.py" />
+        <option value="$PROJECT_DIR$/Fletcher1/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/Fletcher1/FP/parameters.py" />
+        <option value="$PROJECT_DIR$/Fletcher1/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-timing/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/IceChronoClasses.py" />
+        <option value="$PROJECT_DIR$/AICC2012-timing/TALDICE/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-timing/EDC/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-timing/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/parameters.py" />
+        <option value="$PROJECT_DIR$/AICC2012-VLR/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/comparison_manual.py" />
+        <option value="$PROJECT_DIR$/ages-interactive.py" />
+        <option value="$PROJECT_DIR$/Fletcher/parameters-AllDrillings.py" />
+        <option value="$PROJECT_DIR$/IceChrono.py" />
+        <option value="$PROJECT_DIR$/analysis.py" />
+        <option value="$PROJECT_DIR$/Fletcher/parameters.py" />
+        <option value="$PROJECT_DIR$/Fletcher/FP/parameters.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="406" />
+    <option name="y" value="35" />
+    <option name="width" value="1848" />
+    <option name="height" value="1150" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="IceChrono_new" type="b2602c69:ProjectViewProjectNode" />
+              <item name="IceChrono_new" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="IceChrono_new" type="b2602c69:ProjectViewProjectNode" />
+              <item name="IceChrono_new" type="462c0819:PsiDirectoryNode" />
+              <item name="Fletcher" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="IceChrono_new" type="b2602c69:ProjectViewProjectNode" />
+              <item name="IceChrono_new" type="462c0819:PsiDirectoryNode" />
+              <item name="Fletcher" type="462c0819:PsiDirectoryNode" />
+              <item name="FP" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="full.screen.before.presentation.mode" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../.local/lib/python2.7/site-packages/emcee/moves/__init__.py" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/../IceChrono.py" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/EDML" />
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/EDC-EDML" />
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/EDC" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE" />
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/TALDICE" />
+      <recent name="$PROJECT_DIR$/AICC2012-VLR/EDC" />
+      <recent name="$PROJECT_DIR$/Fletcher/FP" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IceChrono" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration name="IceChrono" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="IceChrono" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/IceChrono.py" />
+      <option name="PARAMETERS" value="MCtest" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.IceChrono" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c0cb6e98-e8aa-49a6-bc9d-e20e70d9e72d" name="Default" comment="" />
+      <created>1476880782492</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1476880782492</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Test commit, includes a comment.">
+      <created>1477475333592</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1477475333592</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Automated synchronization modules added + test directories&#10;">
+      <created>1493713474343</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1493713474343</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Latest automated synchronization (tested, new analysis software)">
+      <created>1560864583544</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1560864583544</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="35" width="2560" height="1405" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Structure" order="0" side_tool="true" weight="0.24960423" />
+      <window_info id="Favorites" order="1" sideWeight="0.38104838" side_tool="true" weight="0.20134494" />
+      <window_info content_ui="combo" id="Project" order="2" sideWeight="0.6189516" visible="true" weight="0.16916996" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32743362" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32843137" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39845476" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32853982" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5008" side_tool="true" weight="0.47580644" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.4981511" weight="0.33578432" />
+      <window_info anchor="bottom" id="Messages" order="9" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.48443273" weight="0.28064516" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.4992" visible="true" weight="0.4782258" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" x="0" y="0" width="590" height="1206" id="Documentation" order="3" side_tool="true" weight="0.3296" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="Structure" order="0" side_tool="true" weight="0.24960423" />
+      <window_info id="Favorites" order="1" sideWeight="0.42132866" side_tool="true" weight="0.2939314" />
+      <window_info active="true" content_ui="combo" id="Project" order="2" sideWeight="0.57867134" visible="true" weight="0.18627968" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32743362" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3289183" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39845476" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.3289183" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.51345646" side_tool="true" weight="0.40838853" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.4981511" weight="0.33628318" />
+      <window_info anchor="bottom" id="Messages" order="9" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.48601583" weight="0.4181416" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.51398414" visible="true" weight="0.2721239" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout-to-restore>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Test commit, includes a comment." />
+    <MESSAGE value="Automated synchronization modules added + test directories&#10;" />
+    <MESSAGE value="Latest automated synchronization (tested, new analysis software)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Latest automated synchronization (tested, new analysis software)" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/AICC2012-VLR/EDC/animator.py</url>
+          <line>96</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ages-interactive.py</url>
+          <line>67</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Validation/parameters-AllDrillings.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE/ice_depth-save.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE/air_depth-loulergue.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/EDC-TALDICE/air_depth-save.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2" selection-start-line="2" selection-end-line="22" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Validation/VK/thinning-prior-save.txt" />
+    <entry file="file://$PROJECT_DIR$/Validation/VK/thinning-prior-true.txt" />
+    <entry file="file://$PROJECT_DIR$/Validation/VK/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-priors/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/Validation/EDC/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-priors/EDC/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-priors/TALDICE/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-best/EDC/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-best/parameters-AllDrillings.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR-best/parameters.py" />
+    <entry file="file:///run/user/10867/jupyter/nbserver-16573-open.html" />
+    <entry file="file:///run/user/10867/jupyter/nbserver-21664-open.html" />
+    <entry file="file://$PROJECT_DIR$/plot-priors.py" />
+    <entry file="file://$PROJECT_DIR$/mpld3test.py" />
+    <entry file="file://$PROJECT_DIR$/../Téléchargements/theme_BeamerFrankfurt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-387" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/beampy-custom-theme.py" />
+    <entry file="file://$PROJECT_DIR$/src/beampy/beampy/themes/beampy-custom-theme.py" />
+    <entry file="file://$PROJECT_DIR$/src/beampy/beampy/themes/custom_theme.py" />
+    <entry file="file://$PROJECT_DIR$/variables-interactive.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/pip-delete-this-directory.txt" />
+    <entry file="file://$PROJECT_DIR$/beampy-test.py" />
+    <entry file="file://$PROJECT_DIR$/Fletcher1/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/Fletcher1/FP/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/EDC/parameters-CovarianceTuning-save.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher1/parameters-AllDrillings.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/TALDICE/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="34" selection-start-line="8" selection-start-column="34" selection-end-line="8" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/EDC/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/EDC/CH4.txt" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/TALDICE/CH4.txt" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/parameters-AllDrillings.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/TALDICE/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/EDC/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-timing/parameters.py" />
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/parameters-AllDrillings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="4" column="16" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-LR/parameters-AllDrillings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="4" column="16" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-LR/parameters.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AICC2012-VLR/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ages-interactive.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="770">
+          <caret line="56" column="47" selection-start-line="56" selection-start-column="47" selection-end-line="56" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#44#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/comparison_manual.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="814">
+          <caret line="109" selection-start-line="109" selection-end-line="109" />
+          <folding>
+            <element signature="e#108#118#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher/FP/CH4-p1.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="13" column="49" lean-forward="true" selection-start-line="13" selection-start-column="49" selection-end-line="13" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="21" selection-start-column="21" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="836">
+          <caret line="59" column="61" selection-start-line="59" selection-start-column="61" selection-end-line="59" selection-end-column="61" />
+          <folding>
+            <element signature="e#150#160#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher/FP/CH4_target.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher/parameters-AllDrillings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Fletcher/FP/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="20" column="37" selection-start-line="20" selection-start-column="37" selection-end-line="20" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IceChronoClasses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="13181">
+          <caret line="612" column="5" selection-start-line="612" selection-start-column="4" selection-end-line="635" selection-end-column="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IceChrono.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1386">
+          <caret line="63" selection-start-line="63" selection-end-line="75" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

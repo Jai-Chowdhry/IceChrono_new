@@ -1,0 +1,24 @@
+#Parameters specific to the FP ice core
+self.dim=1
+self.udepth_top=0.
+self.calc_a=True
+self.calc_a_method='deut'
+self.calc_tau=True
+self.calc_LID=True
+self.age_top=-62.77           #Is that the correct surface age?
+self.A0=0.5
+self.beta=0.025
+self.thickness=600.0         #From Emilie, 655 otherwise
+self.depth=np.arange(0., 600.0, 1.) #np.arange(0., 655.0, 1.)  # Why was the 640.1 here
+self.pprime=m.log(-0.5+1)
+self.s=0.
+self.muprime=m.log(1e-02)
+self.corr_a_age=np.arange(self.age_top, 50000+self.age_top+0.01, self.age_step)      #Age grid for the accu correction function
+self.corr_LID_age=np.arange(self.age_top, 50000+self.age_top+0.01, self.age_step)    #Age grid for the LID correction function
+self.corr_tau_depth=np.arange(self.depth[0], self.depth[-1]+0.01, (self.depth[-1]-self.depth[0])/(self.corr_tau_nodes-1))
+self.LID_value=78.         #Given by Emilie, average of several estimates.
+self.tuning_dict = {'CH4-p1':'air'}  # [Orbital] tuning proxies and respective age scales, 'ice' or 'air'.
+self.tuning_uncertainty = {'CH4-p1':30}  # Modeling uncertainty for tuning proxy. Depends on confidence with respect to rest of residuals. Synchronization may bug if too small...
+self.tuning_matrices = 'sparse'  # Specify if tuning correlation matrices are sparse, greatly improves computational efficiency for large matrices. Options 'sparse', 'dense'
+self.tuning_multi = {'CH4-p1':False} #Which proxies to compare with other cores??
+self.calc_corr_tuning = False # Calculate the correlation matrix for tuning ? If false the correlation matrix is assumed identity (can speed up calculation)
