@@ -20,17 +20,13 @@ import os
 import scipy.linalg #
 from scipy.optimize import leastsq, minimize, basinhopping
 import emcee #
-import ptemcee
-import kombine
 from schwimmbad import MPIPool, MultiPool
 import scipy.sparse.linalg
 import gc
 import more_itertools as mit
 import copy
 import shutil
-import h5py #
 from sksparse.cholmod import cholesky as cholesky_sparse #
-import pickle
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.linalg import cholesky
 
@@ -67,7 +63,6 @@ execfile('IceChronoClasses.py')
 
 def residuals(var): #FIXME something gets unintentionally updated here with the wrong timing...
     """Calculate the residuals."""
-    gc.collect()
     resi=np.array([])
     index=0
     for i,dlabel in enumerate(list_drillings):
@@ -78,12 +73,10 @@ def residuals(var): #FIXME something gets unintentionally updated here with the 
         for j,dlabel2 in enumerate(list_drillings):
             if j<i:
                 resi=np.concatenate((resi,DC[dlabel2+'-'+dlabel].residuals()))
-    gc.collect()
     return resi
 
 def residuals_obs(var):
     """Calculate the residuals."""
-    gc.collect()
     resi=np.array([])
     index=0
     for i,dlabel in enumerate(list_drillings):
@@ -94,12 +87,10 @@ def residuals_obs(var):
         for j,dlabel2 in enumerate(list_drillings):
             if j<i:
                 resi=np.concatenate((resi,DC[dlabel2+'-'+dlabel].residuals()))
-    gc.collect()
     return resi
 
 def residuals_prior(var):
     """Calculate the residuals."""
-    gc.collect()
     resi=np.array([])
     index=0
     for i,dlabel in enumerate(list_drillings):
@@ -110,7 +101,6 @@ def residuals_prior(var):
         #for j,dlabel2 in enumerate(list_drillings):
         #    if j<i:
         #        resi=np.concatenate((resi,DC[dlabel2+'-'+dlabel].residuals()))
-    gc.collect()
     return resi
 
 blob2 = {}
@@ -250,7 +240,7 @@ elif opt_method=="dogleg":
 
 elif opt_method == 'MC':
 
-    mc_backend = emcee.backends.HDFBackend('saved_iterations.hdf5',name='mcmc',read_only=False) #See emcee backends documentation for how to load
+    mc_backend = emcee.backends.HDFBackend(datadir+'saved_iterations.hdf5',name='mcmc',read_only=False) #See emcee backends documentation for how to load
 
     print 'Optimization by [parallel] affine invariant MCMC'
 
@@ -259,17 +249,17 @@ elif opt_method == 'MC':
     #print'Initializing walkers'
 
     if not mpi_activate:
-        pool=MultiPool()
+        pool=MultiPool(processes=nb_nodes)
         #if not pool.is_master():
         #    pool.wait()
         #    sys.exit(0)
-        variables_list = pool.map(complist, range(
-            MC_walkers))  # FIXME why not include variables as an argument? Would allow for earlier parallelization
+        variables_list = map(complist, range(
+            MC_walkers))  # FIXME reset to pool.map after tests
         #print("Variable list size ", np.shape(variables_list))
-        pos0 = pool.map(emcee_init_all, variables_list)
+        pos0 = map(emcee_init_all, variables_list)
         pos0[0] = variables #Hack to ensure the non-perturbed initial position is included #FIXME why is this not working???
-        steps = emcee.EnsembleSampler(MC_walkers, np.size(variables), cost_function_negative, pool=pool, a=MC_step,
-                                      backend=mc_backend, moves=emcee.moves.StretchMove(a=MC_step, live_dangerously=True))
+        steps = emcee.EnsembleSampler(MC_walkers, np.size(variables), cost_function_negative, a=MC_step,
+                                      backend=mc_backend, moves=emcee.moves.StretchMove(a=MC_step, live_dangerously=True)) #Fixme add pool=pool after profiling
 
         print 'Walkers initialized. Starting optimization'
 
@@ -300,10 +290,11 @@ elif opt_method == 'MC':
                 (emcee.moves.DEMove(gamma0=(2.38 / np.sqrt(2 * np.size(variables))), live_dangerously=True), 0.5),
                 (emcee.moves.DEMove(gamma0=0.98,live_dangerously=True), 0.1)]
 
-            moves_adaptive = [
-                (TerBraak2008_snookermove(backend=mc_backend,live_dangerously=True), 0.1),
-                (TerBraak2008_DEMove(backend=mc_backend,live_dangerously=True), 0.8),
-                (TerBraak2008_DEMove(gamma0=0.98,backend=mc_backend,live_dangerously=True), 0.1),]
+            if MC_adaptive:
+                moves_adaptive = [
+                    (TerBraak2008_snookermove(backend=mc_backend,live_dangerously=True), 0.1),
+                    (TerBraak2008_DEMove(backend=mc_backend,live_dangerously=True), 0.8),
+                    (TerBraak2008_DEMove(gamma0=0.98,backend=mc_backend,live_dangerously=True), 0.1),]
 
             if not MC_adaptive and not MC_kombine:
                 steps = emcee.EnsembleSampler(MC_walkers, np.size(variables), cost_function_negative, pool=pool, backend=mc_backend, moves=moves)
@@ -312,6 +303,7 @@ elif opt_method == 'MC':
                 steps = emcee.EnsembleSampler(MC_walkers, np.size(variables), cost_function_negative, pool=pool,
                                           backend=mc_backend, moves=moves_adaptive)
             elif MC_kombine:
+                import kombine
                 steps = kombine.Sampler(MC_walkers, np.size(variables), cost_function_negative, pool=pool)
                 steps.burnin(p0=pos0,max_steps=100,verbose=True) #testing emcee for burnin
                 for result in tqdm.tqdm (steps.sample(p0=pos0,iterations=MC_iter),total=MC_iter):
@@ -320,7 +312,7 @@ elif opt_method == 'MC':
 
             print 'Walkers initialized. Starting optimization'
             if not MC_kombine:
-                steps.run_mcmc(pos0, nsteps=MC_iter,  progress=True, tune=True) #Tune should only work with moves_adaptive
+                steps.run_mcmc(pos0, nsteps=MC_iter,  progress=True, tune=True, thin=MC_thin) #Tune should only work with moves_adaptive
             #Fixme, with adaptive should we then stop, clear and rerun without adaptation???
     if not MC_kombine:
         maxindex = np.argmax(steps.get_log_prob(flat=True))
@@ -337,9 +329,9 @@ elif opt_method == 'MC':
         variables = res = maxfit
         hess = np.zeros((np.size(variables), np.size(variables)))
         np.savetxt('bestresi.txt', residuals(variables))
-        b = mpl.figure()
-        mpl.hist(steps.get_autocorr_time(c=5, tol=50, quiet=True))
-        b.savefig('autocorrelationtime_chain0.png')
+        #b = mpl.figure()
+        autocorr_time = steps.get_autocorr_time(c=5, tol=50, quiet=True) #Will send a warning if autocorrelation time is too large/Not enough iterations
+        #b.savefig('autocorrelationtime_chain0.png')
     elif MC_kombine:
         maxindex = np.argmax(steps.lnpost.flatten())
         a = mpl.figure()
@@ -360,9 +352,10 @@ elif opt_method == 'MC':
     #maxindex = np.unravel_index(np.argmax(steps.lnprobability), np.shape(steps.lnprobability))
     #maxfit = steps.chain[maxindex]
     #variables = res = maxfit
-    #hess = np.zeros((np.size(variables), np.size(variables)))
+    hess = np.zeros((np.size(variables), np.size(variables)))
 
 elif opt_method == 'PT':
+    import ptemcee
     print 'Optimization by parallel tempering ensemble MCMC'
 
     pos0 = []
@@ -428,7 +421,7 @@ elif opt_method == 'PT':
     #print np.shape(steps.get_chain(flat=True))
     print steps.acceptance_fraction
     #variables = res = maxfit
-    #hess = np.zeros((np.size(variables), np.size(variables)))
+    hess = np.zeros((np.size(variables), np.size(variables)))
     #np.savetxt('bestresi.txt', residuals(variables))
 elif opt_method=='basinhopping':
     print 'Optimization by basin hopping'

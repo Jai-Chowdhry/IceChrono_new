@@ -234,8 +234,12 @@ class Record:
         self.tuning_age = {}
         self.tuning_target = {}
         self.tuning_target_sigma = {}
-        if not hasattr(self, 'tuning_uncertainty'):
-            self.tuning_uncertainty = {}
+
+        #Load tuning parameters
+        self.tuning_uncertainty = getattr(self, 'tuning_uncertainty',{})
+        self.calc_corr_tuning = getattr(self,'calc_corr_tuning', False)
+        self.tuning_correlation = getattr(self, 'tuning_correlation', {})
+        self.tuning_multi = getattr(self,'tuning_multi', False)
 
         if hasattr(self, 'tuning_dict'):  # Tuning files
             # print "loading tuning files"
@@ -255,8 +259,8 @@ class Record:
 
                     else:
                         raise ValueError('Tuning proxy file ' + element + '.txt not found in ' + datadir + self.label + '/')
-                if not hasattr(self, 'tuning_uncertainty'):
-                    self.tuning_uncertainty.update({proxy: 0})
+                if proxy not in self.tuning_uncertainty:
+                    self.tuning_uncertainty[proxy] = 0.0
 
                 if not self.tuning_multi[proxy]:
                     filename = datadir + self.label + '/' + proxy + '_target.txt'  # Tuning targets
@@ -386,10 +390,8 @@ class Record:
         self.Ddepth_correlation=np.diag(np.ones(np.size(self.Ddepth_depth)))
 
         if self.calc_corr_tuning:
-            if not hasattr(self, 'tuning_correlation'):
-                self.tuning_correlation = {}
-                for proxy, tag in self.tuning_dict.items():
-                    self.tuning_correlation.update({proxy: np.diag(np.ones(np.size(self.tuning_proxy[proxy])))})
+            for proxy, tag in self.tuning_dict.items():
+                self.tuning_correlation.update({proxy: np.diag(np.ones(np.size(self.tuning_proxy[proxy])))})
 
         filename=datadir+'/parameters-CovarianceObservations-AllDrillings.py'
         if os.path.isfile(filename):
@@ -412,7 +414,7 @@ class Record:
         if np.size(self.Ddepth_depth)>0:
             self.Ddepth_chol=cholesky(self.Ddepth_correlation)
             self.Ddepth_lu_piv=scipy.linalg.lu_factor(np.transpose(self.Ddepth_chol))
-        if self.calc_corr_tuning:
+        if getattr(self,'calc_corr_tuning'):
             if np.size(self.tuning_proxy)>0:  # Tuning correlation matrix
                 self.tuning_lu_piv={}
                 for proxy, tag in self.tuning_dict.items():
@@ -450,8 +452,8 @@ class Record:
         #udepth
         self.udepth_model=self.udepth_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau_model*self.depth_inter)))
 
-        self.LIDIE_model=self.LID_model*self.Dfirn
-        self.ULIDIE_model=np.interp(self.LIDIE_model, self.iedepth, self.udepth_model)
+        self.ULIDIE_model=self.LID_model*self.Dfirn
+#        self.ULIDIE_model=np.interp(self.LIDIE_model, self.iedepth, self.udepth_model)
 
         #Ice age
         self.icelayerthick_model=self.tau_model*self.a_model/self.D
@@ -467,23 +469,23 @@ class Record:
 
     def corrected_model(self):
 
-        self.correlation_corr_a_before=self.correlation_corr_a+0
-        self.correlation_corr_LID_before=self.correlation_corr_LID+0
-        self.correlation_corr_tau_before=self.correlation_corr_tau+0
-
-        filename=datadir+'/parameters-CovariancePrior-AllDrillings.py'
-        if os.path.isfile(filename):
-            execfile(filename)
-        filename=datadir+self.label+'/parameters-CovariancePrior.py'
-        if os.path.isfile(filename):
-            execfile(filename)
-
-        if (self.correlation_corr_a_before!=self.correlation_corr_a).any():
-            self.chol_a=cholesky(self.correlation_corr_a)
-        if (self.correlation_corr_LID_before!=self.correlation_corr_LID).any():
-            self.chol_LID=cholesky(self.correlation_corr_LID)
-        if (self.correlation_corr_a_before!=self.correlation_corr_a).any():
-            self.chol_tau=cholesky(self.correlation_corr_tau)
+        # self.correlation_corr_a_before=self.correlation_corr_a+0
+        # self.correlation_corr_LID_before=self.correlation_corr_LID+0
+        # self.correlation_corr_tau_before=self.correlation_corr_tau+0
+        #
+        # filename=datadir+'/parameters-CovariancePrior-AllDrillings.py'
+        # if os.path.isfile(filename):
+        #     execfile(filename)
+        # filename=datadir+self.label+'/parameters-CovariancePrior.py'
+        # if os.path.isfile(filename):
+        #     execfile(filename)
+        #
+        # if (self.correlation_corr_a_before!=self.correlation_corr_a).any():
+        #     self.chol_a=cholesky(self.correlation_corr_a)
+        # if (self.correlation_corr_LID_before!=self.correlation_corr_LID).any():
+        #     self.chol_LID=cholesky(self.correlation_corr_LID)
+        # if (self.correlation_corr_a_before!=self.correlation_corr_a).any():
+        #     self.chol_tau=cholesky(self.correlation_corr_tau)
 
 
         #Accu
@@ -495,9 +497,9 @@ class Record:
         self.tau=self.tau_model*np.exp(np.interp(self.depth_mid, self.corr_tau_depth, np.dot(self.chol_tau,self.corr_tau)*self.sigmap_corr_tau))
         self.udepth=self.udepth_top+np.cumsum(np.concatenate((np.array([0]), self.D/self.tau*self.depth_inter)))
         corr=np.dot(self.chol_LID,self.corr_LID)*self.sigmap_corr_LID
-        self.LID=self.LID_model*np.exp(np.interp(self.age_model, self.corr_LID_age, corr))
-        self.LIDIE=self.LID*self.Dfirn
-        self.ULIDIE=np.interp(self.LIDIE, self.iedepth, self.udepth)
+        self.LID=self.LID_model*np.exp(np.interp(self.airage_model, self.corr_LID_age, corr))
+        self.ULIDIE=self.LID*self.Dfirn
+#        self.ULIDIE=np.interp(self.LIDIE, self.iedepth, self.udepth)
 
         #Ice age
         self.icelayerthick=self.tau*self.a/self.D
@@ -529,7 +531,7 @@ class Record:
 
         ##Raw model
 
-        self.raw_model()
+#        self.raw_model()
 
         ##Corrected model
 
@@ -638,15 +640,15 @@ class Record:
     def residuals(self, variables):
         #time0 = time.time()
         self.model(self.variables)
-        if np.any(self.tuning_multi.values()):
+        if self.tuning_multi:
             for drilling in list_drillings:
                 D[drilling].model(D[drilling].variables)
 
-        if hasattr(self, 'tuning_correlation') and self.calc_corr_tuning:
+        if self.calc_corr_tuning:
             self.tuning_correlation_before=self.tuning_correlation.copy()
 
         if self.calc_corr_tuning:
-            for proxy in self.tuning_dict.keys():  # Synchronization correlation matrix
+            for proxy in self.tuning_dict:  # Synchronization correlation matrix
                 if not np.array_equal(self.tuning_correlation_before[proxy],self.tuning_correlation[proxy]):
                     self.tuning_chol.update({proxy:np.array([])})
                     self.tuning_lu_piv.update({proxy:np.array([])})
@@ -673,23 +675,23 @@ class Record:
         if np.size(self.icemarkers_depth)>0:
             resi_age=scipy.linalg.lu_solve(self.icemarkers_lu_piv,resi_age)
         resi_airage=(self.fct_airage(self.airmarkers_depth)-self.airmarkers_age)/self.airmarkers_sigma
-        if np.isnan(resi_airage).any():
-            return np.array([np.inf])
+        """if np.isnan(resi_airage).any():
+            return np.array([np.inf])"""
         if np.size(self.airmarkers_depth)>0:
             resi_airage=scipy.linalg.lu_solve(self.airmarkers_lu_piv,resi_airage)
         resi_iceint=(self.fct_age(self.iceintervals_depthbot)-self.fct_age(self.iceintervals_depthtop)-self.iceintervals_duration)/self.iceintervals_sigma
-        if np.isnan(resi_iceint).any():
-            return np.array([np.inf])
+        """if np.isnan(resi_iceint).any():
+            return np.array([np.inf])"""
         if np.size(self.iceintervals_depthtop)>0:
             resi_iceint=scipy.linalg.lu_solve(self.iceintervals_lu_piv,resi_iceint)
         resi_airint=(self.fct_airage(self.airintervals_depthbot)-self.fct_airage(self.airintervals_depthtop)-self.airintervals_duration)/self.airintervals_sigma
-        if np.isnan(resi_airint).any():
-            return np.array([np.inf])
+        """if np.isnan(resi_airint).any():
+            return np.array([np.inf])"""
         if np.size(self.airintervals_depthtop)>0:
             resi_airint=scipy.linalg.lu_solve(self.airintervals_lu_piv,resi_airint)
         resi_Ddepth=(self.fct_Ddepth(self.Ddepth_depth)-self.Ddepth_Ddepth)/self.Ddepth_sigma
-        if np.isnan(resi_Ddepth).any():
-            return np.array([np.inf])
+        """if np.isnan(resi_Ddepth).any():
+            return np.array([np.inf])"""
         if np.size(self.Ddepth_depth)>0:
             resi_Ddepth=scipy.linalg.lu_solve(self.Ddepth_lu_piv,resi_Ddepth)
 
@@ -756,11 +758,11 @@ class Record:
             for drilling in list_drillings:
                 D[drilling].model(D[drilling].variables)
 
-        if hasattr(self, 'tuning_correlation') and self.calc_corr_tuning:
+        if self.tuning_correlation and self.calc_corr_tuning:
             self.tuning_correlation_before = self.tuning_correlation.copy()
 
         if self.calc_corr_tuning:
-            for proxy in self.tuning_dict.keys():  # Synchronization correlation matrix
+            for proxy in self.tuning_dict:  # Synchronization correlation matrix
                 if not np.array_equal(self.tuning_correlation_before[proxy], self.tuning_correlation[proxy]):
                     self.tuning_chol.update({proxy: np.array([])})
                     self.tuning_lu_piv.update({proxy: np.array([])})
@@ -1183,7 +1185,17 @@ class Record:
             #mpl.xlabel(tag + ' age (yr BP)')
             #mpl.ylabel(proxy)
             # Age at final depth, proxy value minus sigma, proxy value plus sigma
-            ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color="#3F5D7D", linewidth=0.3, label='Target')
+            if self.tuning_multi:
+                tuning_label = ''
+                for drilling in list_drillings:
+                    if D[drilling].label != self.label:
+                        tuning_label += D[drilling].label + ' '
+
+                ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color="#3F5D7D", linewidth=0.3, label=tuning_label)
+
+            else:
+                ax.plot(self.tuning_age[proxy], self.tuning_target[proxy], color="#3F5D7D", linewidth=0.3,
+                        label='Target')
             if proxy in self.tuning_target_sigma:
                 ax.fill_between(self.tuning_age[proxy],
                             self.tuning_target[proxy] - 2*self.tuning_target_sigma[proxy],
@@ -1216,8 +1228,11 @@ class Record:
 
             ax.tick_params(axis='x', top='off')
             ax.tick_params(axis='y', right='off')
-            ax.spines["top"].set_visible(False)
-            ax.spines["right"].set_visible(False)
+            mpl.xlabel('Age (yr BP)')
+            if hasattr(self,'tuning_units'):
+                mpl.ylabel(proxy+' ('+self.tuning_units[proxy]+')')
+            else:
+                mpl.ylabel(proxy)
 
             pp = PdfPages(datadir + self.label + '/tuning' + proxy + '.pdf')
             pp.savefig(mpl.figure(self.label + ' ' + proxy),bbox_inches='tight')
@@ -1235,35 +1250,11 @@ class Record:
         self.variables_x = np.concatenate((self.variables_x, self.corr_tau_depth, self.corr_a_age, self.corr_LID_age))
         np.savetxt(datadir+self.label+'/restart.txt',np.column_stack((len(self.corr_tau),len(self.corr_a),len(self.corr_LID), [np.transpose(self.variables)])))
         np.savetxt(datadir+self.label+'/restart_x.txt',np.column_stack((len(self.corr_tau),len(self.corr_a),len(self.corr_LID), [np.transpose(self.variables_x)])))
-        if opt_method == 'MC' and MC_write:
 
-            print 'Writing MC results'
-            if not os.path.isdir(datadir + self.label + '/MC-ensemble'):
-                os.mkdir(datadir + self.label + '/MC-ensemble')
-            else:
-                shutil.rmtree(datadir + self.label + '/MC-ensemble')
-                os.mkdir(datadir + self.label + '/MC-ensemble')
-
-            for i in np.arange(len(steps.blobs)):
-                g = h5py.File(datadir + self.label + '/MC-ensemble/agedepth{}.hdf5'.format(str(i)), 'w')
-                for j, x in enumerate(steps.blobs[i]):
-                    g.create_dataset("agedepthMC{}".format(str(j)), shape=np.shape(x[self.label]),data=x[self.label], chunks=True, compression="gzip", compression_opts=9)
-                g.close()
-
-            # for i in np.arange(len(steps.blobs)):
-            #     if not os.path.isdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i))):
-            #         os.mkdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
-            #     else:
-            #         shutil.rmtree(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
-            #         os.mkdir(datadir + self.label + '/MC-ensemble/{}'.format(str(i)))
-            #     for j, x in enumerate(steps.blobs[i]):
-            #         np.savetxt("{}.txt".format(str(j)), x[self.label])
-
-            print 'MC results written'
         for proxy, tag in self.tuning_dict.items(): #Fixme: only written for air
             np.savetxt(datadir+self.label+'/{}_synchro_residuals.txt'.format(proxy),np.array([np.mean((self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]),proxy)-self.tuning_proxy[proxy])/self.tuning_proxy[proxy]),np.std((self.fct_tuning_target(self.fct_airage(self.tuning_depth[proxy]),proxy)-self.tuning_proxy[proxy])/self.fct_tuning_target(self.fct_airage(self.tuning_proxy[proxy]),proxy))]))
 
-        if hasattr (self,'savecovariance') and self.savecovariance:
+        if getattr(self,'savecovariance',False):
             np.savez(datadir+self.label+'/covariance.npz',age=self.c_age,airage=self.c_airage,Ddepth=self.c_Ddepth,a=self.c_a,tau=self.c_tau,LID=self.c_LID,icelayerthick=self.c_icelayerthick,airlayerthick=self.c_airlayerthick)
             print 'Posterior covariance saved for ' + self.label
 

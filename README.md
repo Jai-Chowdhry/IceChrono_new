@@ -9,6 +9,7 @@ What this manual is and is not?
 
 This manual is a documentation on how to use the IceChrono software.  
 It is _not_ a description of the IceChrono principles. Please read to the scientific articles describing IceChrono for that purpose:  
+Chowdhry Beeman, J., Parrenin, F., Witrant, E., Landais, A., Fain, X., Tournadre, B., and Mulvaney, R.: Automated and probabilistic synchronization of paleoclimate records in IceChrono 2.0. _in preparation_.
 Parrenin, F., Bazin, L., Capron, E., Landais, A., Lemieux-Dudon, B. and Masson-Delmotte, V.: IceChrono1: a probabilistic model to compute a common and optimal chronology for several ice cores, _Geosci. Model Dev._, 8(5), 1473–1492, doi:10.5194/gmd-8-1473-2015, 2015.  
 It is _not_ an operating system or python documentation. Please use your operating system or python documentation instead.
 
@@ -24,8 +25,15 @@ You just need a google account to access this mailing list.
 How to download IceChrono?
 --------------------------
 
+_For the stable version_
 Go here:  
 https://github.com/parrenin/IceChrono/releases  
+
+_For the latest version, with the synchronization module included_
+https://github.com/Jai-Chowdhry/IceChrono/releases
+
+The synchronization module will be included in the stable version of IceChrono soon, expect both versions to be upgraded to Python 3.
+
 and choose the release you want to download (usually the latest one).  
 In the downloaded folder, you will find the following files:
 - README.md		: is the current documentation of IceChrono.
@@ -55,11 +63,33 @@ IceChrono probably works on other scipy distributions, provided they contain the
 - warnings
 - scipy
 
+_Important_: To use the synchronization module, some additional packages are required:
+
+- The latest version of emcee (3.0rc2 at the time of writing). This can be installed using pip via:
+
+pip install https://github.com/dfm/emcee/archive/master.zip
+
+- The schwimmbad multiprocessor package. This can be installed via pip (recommended) or directly into conda (untested):
+
+pip install schwimmbad
+conda install -c pjones schwimmbad
+
+- tqdm (for progress bar)
+
+pip install tqdm
+conda install -c conda-forge tqdm
+
+- scikit-sparse (Scipy extension for sparse matrices)
+
+pip install --user scikit-sparse
+conda install -c conda-forge scikit-sparse
+
+
 
 How to run IceChrono?
 ---------------------
 
-Assuming you use anaconda, you can go in the spyder shell and type the following commands:
+If you use anaconda, you can go in the spyder shell and type the following commands:
 
 ```
 cd path-to-IceChrono
@@ -242,6 +272,49 @@ self.correlation_corr_a=f(np.abs(M))
 ```
 
 Don't forget that if you find the use of python and the IceChrono internal variables too difficult, you can define your correlation matrices outside IceChrono and import them here by using for example the `np.loadtxt` function.
+
+
+
+How to use the synchronization module?
+-----------------------------------------------------
+
+The easiest way to use the synchronization module is to modify the parameter files from an already existing experiment (i.e. AICC2012-VLR/parameters.py or Fletcher1/parameters.py) 
+
+The following parameters are related to synchronization:
+
+opt_method='MC' (leastsq etc. will not work well for synchronization)
+MC_iter = x (where x is the number of iterations requested. For AICC2012-VLR, we reccommend > 200,000 for best convergence)
+MC_walkers = y (where y is the number of walkers? For AICC2012-VLR, we reccommend 128 walkers)
+MC_thin = n (where n is a thinning factor i.e. 50 to save one in every 50 iterations)
+MC_restart_backend is an optional parameter to restart from the last MC simulation, if 'True' it requires the experiment configuration to be the same as the last simulation.
+
+In the parameters-AllDrillings.py file, set
+
+self.MC_init_width= 1.
+
+Finally, in the individual drilling files, the following parameters should be defined. Here, we use the example of a synchronization using CH4
+
+self.tuning_dict = {'CH4':'air'} 
+
+This parameter gives each tuning proxy a name ('CH4') and associates it with the air phase ('air') or the ice phase ('ice) of the ice core. The parameter is expressed as a python dictionary, i.e. {'CH4':'air','Sulfate':'ice'}.
+The dictionary can accept multiple proxies. The proxy should be accessible in the drilling folder with the name 'CH4.txt' or 'name.txt' for proxy 'name'.
+
+self.tuning_uncertainty = {'CH4-p1':5}  
+
+A dictionary specifying the uncertainty associated with each proxy (in the units of the proxy)
+
+
+self.tuning_multi = {'CH4-p1':False} 
+
+If true, we look for the corresponding target in the other cores in the simulation. If false, the target should be in a text file named 'CH4_target.txt' or 'name_target.txt' for proxy 'name'.
+
+
+Matrix algebra for the synchronization:
+
+
+self.tuning_matrices = 'sparse' ... If the matrices can be assumed sparse, otherwise 'dense'
+
+self.calc_corr_tuning = False ... If the correlation matrices for the synchronization can be assumed identity (this is usually approximately true), otherwise True. 
 
 
 What to do if something goes wrong?

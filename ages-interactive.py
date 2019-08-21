@@ -54,9 +54,9 @@ DC={}
 execfile('IceChronoClasses.py')
 
 reader = emcee.backends.HDFBackend(datadir+"saved_iterations.hdf5")
-flatchain = reader.get_chain(flat=True)
+flatchain = reader.get_chain(flat=True,thin=100)
 
-chains = flatchain[1::100000] #Eventually, we loop over variables, or use a class or function. flatchain should give us one variable set at a time
+chains = flatchain #Eventually, we loop over variables, or use a class or function. flatchain should give us one variable set at a time
 
 for dlabel in list_drillings: #This is the initialization loop
     D[dlabel] = Record(dlabel)
@@ -132,11 +132,11 @@ airTALOS = figure(tools=TOOLS, plot_width=300, plot_height=300, title='TALDICE',
 airTALOS.multi_line(xs = 'airageTALOS', ys = 'depthTALOS', source=source, line_color="saddlebrown", line_width=0.2)
 
 methane = figure(tools=TOOLS, plot_width=300, plot_height=300, title='CH4 Synchronization', x_axis_label='Air Age (yr BP)', y_axis_label='CH4 (ppbv)')
-methane.multi_line(xs = 'methageEDC', ys = 'methEDC', source=source, line_color="darkslateblue", line_width=0.2)
-methane.multi_line(xs = 'methageTALOS', ys = 'methTALOS', source=source, line_color="saddlebrown", line_width=0.2)
+methane.multi_line(xs = 'methageEDC', ys = 'methEDC', source=source, line_color="darkslateblue", line_width=0.1)
+methane.multi_line(xs = 'methageTALOS', ys = 'methTALOS', source=source, line_color="saddlebrown", line_width=0.1)
 
 
 p = gridplot([[iceEDC, iceTALOS],[airEDC, airTALOS],[methane]])
 
-output_file(os.getcwd() + '/bokehtest.html')
+output_file(datadir + '/ages-interactive.html')
 save(p)
